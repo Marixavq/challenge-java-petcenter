@@ -25,6 +25,7 @@ public class User {
 
     @Column(name = "tipo_usuario")
     private String tipoUsuario;
+
     private Boolean ativo;
 
     @Column(name = "ultimo_login")

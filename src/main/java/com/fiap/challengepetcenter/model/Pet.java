@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
@@ -13,6 +14,7 @@ public class Pet {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "O user é obrigatório")
     private User user;
 
     @Column(nullable = false)

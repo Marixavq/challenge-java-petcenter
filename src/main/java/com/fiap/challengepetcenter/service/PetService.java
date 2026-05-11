@@ -28,6 +28,10 @@ public class PetService {
                 .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
     }
 
+    public List<Pet> buscarPorUserId(Long userId) {
+        return petRepository.findByUserId(userId);
+    }
+
     public List<Pet> buscarPorNome(String nome) {
         return petRepository.findByNome(nome);
     }

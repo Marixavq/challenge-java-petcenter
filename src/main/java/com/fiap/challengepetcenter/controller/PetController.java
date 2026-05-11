@@ -1,7 +1,6 @@
 package com.fiap.challengepetcenter.controller;
 
 import com.fiap.challengepetcenter.model.Pet;
-import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.service.PetService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/pets")
@@ -33,6 +31,11 @@ public class PetController {
     @GetMapping("/{id}")
     public ResponseEntity<Pet> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(petService.buscarPorId(id));
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<Pet>> buscarPorUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(petService.buscarPorUserId(userId));
     }
 
     @GetMapping("/nome/{nome}")

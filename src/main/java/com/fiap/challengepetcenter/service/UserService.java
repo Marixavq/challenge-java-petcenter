@@ -29,6 +29,11 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
+    public User buscarPorEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    }
+
     public User atualizar(Long id, User userAtualizado) {
         User userExistente = buscarPorId(id);
         userExistente.setNome(userAtualizado.getNome());

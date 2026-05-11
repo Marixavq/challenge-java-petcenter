@@ -34,6 +34,11 @@ public class UserController {
         return ResponseEntity.ok(userService.buscarPorId(id));
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<User> buscarPorEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.buscarPorEmail(email));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<User> atualizar(@PathVariable Long id,
                                           @Valid @RequestBody User userAtualizado) {

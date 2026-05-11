@@ -22,8 +22,12 @@ public class User {
     private String senha;
 
     private String telefone;
+
+    @Column(name = "tipo_usuario")
     private String tipoUsuario;
     private Boolean ativo;
+
+    @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
 
     @Column(name = "data_criacao")

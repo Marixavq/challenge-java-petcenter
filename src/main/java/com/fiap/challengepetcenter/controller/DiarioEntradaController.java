@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/diarioentrada/pets")
+@RequestMapping("/api/diarioentradas/")
 public class DiarioEntradaController {
 
     @Autowired
@@ -34,7 +34,7 @@ public class DiarioEntradaController {
         return ResponseEntity.ok(diarioEntradaService.buscarPorId(id));
     }
 
-    // GET /diario-entradas/data?data=2026-05-10
+    // GET http://localhost:8080/api/diarioentradas/data?data=2026-05-11
     @GetMapping("/data")
     public ResponseEntity<List<DiarioEntrada>> buscarPorData(@RequestParam LocalDate data) {
         return ResponseEntity.ok(diarioEntradaService.buscarPorData(data));

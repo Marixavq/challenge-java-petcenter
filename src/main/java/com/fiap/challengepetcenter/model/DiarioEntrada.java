@@ -23,7 +23,9 @@ public class DiarioEntrada {
 
     @NotNull(message = "A data é obrigatória")
     private LocalDate data;
+
     private LocalDateTime criadoEm;
+
     private LocalDateTime atualizadoEm;
 
     @Size(max = 1000, message = "O resumo deve ter no máximo 1000 caracteres")

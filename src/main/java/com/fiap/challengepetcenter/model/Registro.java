@@ -27,7 +27,6 @@ public class Registro {
     private String unidade;
     private String nota;
 
-    @NotNull(message = "O horário é obrigatório")
     private LocalDateTime horario;
 
     private LocalDateTime atualizadoEm;
@@ -35,7 +34,7 @@ public class Registro {
     public Registro() {
     }
 
-    public Registro(DiarioEntrada entrada, Long id, String tipo, String subtipo, Double valor, String unidade, String nota, LocalDateTime horario, LocalDateTime atualizadoEm) {
+    public Registro(DiarioEntrada entrada, Long id, String tipo, String subtipo, Double valor, String unidade, String nota) {
         this.entrada = entrada;
         this.id = id;
         this.tipo = tipo;
@@ -43,8 +42,10 @@ public class Registro {
         this.valor = valor;
         this.unidade = unidade;
         this.nota = nota;
-        this.horario = horario;
-        this.atualizadoEm = atualizadoEm;
+        this.horario = LocalDateTime.now();
+        ;
+        this.atualizadoEm = LocalDateTime.now();
+        ;
     }
 
     public Long getId() {

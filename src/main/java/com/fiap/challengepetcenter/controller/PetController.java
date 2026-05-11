@@ -33,7 +33,7 @@ public class PetController {
         return ResponseEntity.ok(petService.buscarPorId(id));
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<Pet>> buscarPorUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(petService.buscarPorUserId(userId));
     }

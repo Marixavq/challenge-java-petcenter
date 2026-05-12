@@ -15,8 +15,8 @@ public class Registro {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    @NotNull(message = "O user é obrigatório")
+    @JoinColumn(nullable = false)
+    @NotNull(message = "A entrada é obrigatória")
     private DiarioEntrada entrada;
 
     @NotBlank(message = "O tipo é obrigatório")
@@ -43,9 +43,7 @@ public class Registro {
         this.unidade = unidade;
         this.nota = nota;
         this.horario = LocalDateTime.now();
-        ;
         this.atualizadoEm = LocalDateTime.now();
-        ;
     }
 
     public Long getId() {

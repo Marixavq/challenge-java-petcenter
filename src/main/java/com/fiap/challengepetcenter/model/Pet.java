@@ -14,7 +14,7 @@ public class Pet {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @NotNull(message = "O user é obrigatório")
+    @NotNull(message = "O tutor é obrigatório")
     private User user;
 
     @Column(nullable = false)

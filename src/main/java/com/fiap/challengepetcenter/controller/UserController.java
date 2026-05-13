@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.controller;
 
-
+import com.fiap.challengepetcenter.DTO.UserRequestDTO;
+import com.fiap.challengepetcenter.DTO.UserResponseDTO;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.service.UserService;
 import jakarta.validation.Valid;
@@ -19,30 +20,31 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<User> criar(@Valid @RequestBody User user) {
-        User novoUser = userService.salvar(user);
+    public ResponseEntity<UserResponseDTO> criar(@Valid @RequestBody UserRequestDTO requestDTO) {
+        UserResponseDTO novoUser = userService.salvar(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoUser);
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> listarTodos() {
-        return ResponseEntity.ok(userService.listarTodos());
+    public ResponseEntity<List<UserResponseDTO>> listarTodos() {
+        List<UserResponseDTO> users = userService.listarTodos();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(userService.buscarPorId(id));
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> buscarPorEmail(@PathVariable String email) {
+    public ResponseEntity<UserResponseDTO> buscarPorEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.buscarPorEmail(email));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> atualizar(@PathVariable Long id,
-                                          @Valid @RequestBody User userAtualizado) {
-        return ResponseEntity.ok(userService.atualizar(id, userAtualizado));
+    public ResponseEntity<UserResponseDTO> atualizar(@PathVariable Long id,
+                                                     @Valid @RequestBody UserRequestDTO requestDTO) {
+        return ResponseEntity.ok(userService.atualizar(id, requestDTO));
     }
 
     @DeleteMapping("/{id}")

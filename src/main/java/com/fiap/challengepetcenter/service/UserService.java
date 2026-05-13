@@ -1,56 +1,87 @@
 package com.fiap.challengepetcenter.service;
 
+import com.fiap.challengepetcenter.DTO.UserRequestDTO;
+import com.fiap.challengepetcenter.DTO.UserResponseDTO;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public User salvar(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Transactional
+    public UserResponseDTO salvar(UserRequestDTO requestDTO) {
+        if (userRepository.existsByEmail(requestDTO.email())) {
             throw new RuntimeException("Email já cadastrado");
         }
-        return userRepository.save(user);
+
+        User user = new User();
+        user.setNome(requestDTO.nome());
+        user.setEmail(requestDTO.email());
+        user.setSenha(requestDTO.senha());
+        user.setTelefone(requestDTO.telefone());
+        user.setTipoUsuario(requestDTO.tipoUsuario());
+
+        User userSalvo = userRepository.save(user);
+
+        return UserResponseDTO.fromEntity(userSalvo);
     }
 
-    public List<User> listarTodos() {
-        return userRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> listarTodos() {
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+                .map(UserResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    public User buscarPorId(Long id) {
-        return userRepository.findById(id)
+    @Transactional(readOnly = true)
+    public UserResponseDTO buscarPorId(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return UserResponseDTO.fromEntity(user);
     }
 
-    public User buscarPorEmail(String email) {
-        return userRepository.findByEmail(email)
+    @Transactional(readOnly = true)
+    public UserResponseDTO buscarPorEmail(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return UserResponseDTO.fromEntity(user);
     }
 
-    public User atualizar(Long id, User userAtualizado) {
-        User userExistente = buscarPorId(id);
-        userExistente.setNome(userAtualizado.getNome());
-        userExistente.setEmail(userAtualizado.getEmail());
-        userExistente.setSenha(userAtualizado.getSenha());
-        userExistente.setTelefone(userAtualizado.getTelefone());
-        userExistente.setTipoUsuario(userAtualizado.getTipoUsuario());
-        userExistente.setAtivo(userAtualizado.getAtivo());
-        return userRepository.save(userExistente);
+    @Transactional
+    public UserResponseDTO atualizar(Long id, UserRequestDTO requestDTO) {
+        User userExistente = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        userExistente.setNome(requestDTO.nome());
+        userExistente.setEmail(requestDTO.email());
+        userExistente.setSenha(requestDTO.senha());
+        userExistente.setTelefone(requestDTO.telefone());
+        userExistente.setTipoUsuario(requestDTO.tipoUsuario());
+
+        User userAtualizado = userRepository.save(userExistente);
+
+        return UserResponseDTO.fromEntity(userAtualizado);
     }
 
+    @Transactional
     public void deletar(Long id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("Usuário não encontrado");
         }
         userRepository.deleteById(id);
     }
-
-
 }

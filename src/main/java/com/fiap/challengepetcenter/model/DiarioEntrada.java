@@ -1,9 +1,7 @@
 package com.fiap.challengepetcenter.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,14 +26,11 @@ public class DiarioEntrada {
 
     private LocalDateTime atualizadoEm;
 
-    @Size(max = 1000, message = "O resumo deve ter no máximo 1000 caracteres")
     private String resumo;
 
-    @Size(max = 50, message = "O humor geral deve ter no máximo 50 caracteres")
     private String humorGeral;
 
-    @NotBlank(message = "O status é obrigatório")
-    @Size(max = 20, message = "O status deve ter no máximo 20 caracteres")
+    @Column(nullable = false)
     private String status;
 
     public DiarioEntrada() {

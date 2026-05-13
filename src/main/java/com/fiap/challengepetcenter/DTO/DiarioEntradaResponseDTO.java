@@ -8,7 +8,10 @@ public record DiarioEntradaResponseDTO(
         Long id,
         Long idPet,
         String nomePet,
-        LocalDate data
+        LocalDate data,
+        String resumo,
+        String humorGeral,
+        String status
 ) {
 
     public static DiarioEntradaResponseDTO fromEntity(DiarioEntrada diarioEntrada) {
@@ -16,8 +19,10 @@ public record DiarioEntradaResponseDTO(
                 diarioEntrada.getId(),
                 diarioEntrada.getPet().getId(),
                 diarioEntrada.getPet().getNome(),
-                diarioEntrada.getData()
-
+                diarioEntrada.getData(),
+                diarioEntrada.getResumo(),
+                diarioEntrada.getHumorGeral(),
+                diarioEntrada.getStatus()
         );
     }
 }

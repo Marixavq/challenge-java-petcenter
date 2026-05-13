@@ -26,9 +26,7 @@ public class Registro {
     private Double valor;
     private String unidade;
     private String nota;
-
     private LocalDateTime horario;
-
     private LocalDateTime atualizadoEm;
 
     public Registro() {

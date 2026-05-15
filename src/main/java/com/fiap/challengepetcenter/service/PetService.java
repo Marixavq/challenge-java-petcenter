@@ -2,74 +2,103 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.PetRequestDTO;
 import com.fiap.challengepetcenter.DTO.PetResponseDTO;
-import com.fiap.challengepetcenter.DTO.UserRequestDTO;
-import com.fiap.challengepetcenter.DTO.UserResponseDTO;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.PetRepository;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PetService {
 
+    private final PetRepository petRepository;
+    private final UserRepository userRepository;
+
     @Autowired
-    private PetRepository petRepository;
-
-    /*
-        @Transactional
-        public PetResponseDTO salvar(PetRequestDTO requestDTO) {
-
-            Pet pet = new Pet();
-            pet.setUser(requestDTO.userId()); // Long userId,
-            pet.setNome(requestDTO.nome());
-            pet.setEspecie(requestDTO.especie());
-            pet.setRaca(requestDTO.raca());
-            pet.setDataNascimento(requestDTO.dataNascimento());
-            pet.setObservacoes(requestDTO.observacoes());
-
-            Pet petSalvo = petRepository.save(pet);
-
-            return PetResponseDTO.fromEntity(petSalvo);
-        }
-
-    */
-    public List<Pet> listarTodos() {
-        return petRepository.findAll();
+    public PetService(PetRepository petRepository, UserRepository userRepository) {
+        this.petRepository = petRepository;
+        this.userRepository = userRepository;
     }
 
-    public Pet buscarPorId(Long id) {
-        return petRepository.findById(id)
+    @Transactional
+    public PetResponseDTO salvar(PetRequestDTO requestDTO) {
+        User user = userRepository.findById(requestDTO.userId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        Pet pet = new Pet();
+        pet.setUser(user);
+        pet.setNome(requestDTO.nome());
+        pet.setEspecie(requestDTO.especie());
+        pet.setRaca(requestDTO.raca());
+        pet.setDataNascimento(requestDTO.dataNascimento());
+        pet.setObservacoes(requestDTO.observacoes());
+
+        Pet petSalvo = petRepository.save(pet);
+
+        return PetResponseDTO.fromEntity(petSalvo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PetResponseDTO> listarTodos() {
+        List<Pet> pets = petRepository.findAll();
+
+        return pets.stream()
+                .map(PetResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PetResponseDTO buscarPorId(Long id) {
+        Pet pet = petRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+        return PetResponseDTO.fromEntity(pet);
     }
 
-    public List<Pet> buscarPorUserId(Long userId) {
-        return petRepository.findByUserId(userId);
+    @Transactional(readOnly = true)
+    public List<PetResponseDTO> buscarPorUserId(Long userId) {
+
+        List<Pet> pets = petRepository.findByUserId(userId);
+        return pets.stream()
+                .map(PetResponseDTO::fromEntity)
+                .toList();
     }
 
-    public List<Pet> buscarPorNome(String nome) {
-        return petRepository.findByNome(nome);
+    @Transactional(readOnly = true)
+    public List<PetResponseDTO> buscarPorNome(String nome) {
+
+        List<Pet> pets = petRepository.findByNome(nome);
+        return pets.stream()
+                .map(PetResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    public Pet atualizar(Long id, Pet petAtualizado) {
-        Pet petExistente = buscarPorId(id);
-        petExistente.setUser(petAtualizado.getUser());
-        petExistente.setNome(petAtualizado.getNome());
-        petExistente.setEspecie(petAtualizado.getEspecie());
-        petExistente.setRaca(petAtualizado.getRaca());
-        petExistente.setDataNascimento(petAtualizado.getDataNascimento());
-        petExistente.setObservacoes(petAtualizado.getObservacoes());
+    @Transactional
+    public PetResponseDTO atualizar(Long id, PetRequestDTO requestDTO) {
+        Pet petExistente = petRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
 
-        return petRepository.save(petExistente);
+        User user = userRepository.findById(requestDTO.userId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        petExistente.setUser(user);
+        petExistente.setNome(requestDTO.nome());
+        petExistente.setEspecie(requestDTO.especie());
+        petExistente.setRaca(requestDTO.raca());
+        petExistente.setDataNascimento(requestDTO.dataNascimento());
+        petExistente.setObservacoes(requestDTO.observacoes());
+
+        Pet petAtualizado = petRepository.save(petExistente);
+
+        return PetResponseDTO.fromEntity(petAtualizado);
     }
 
+    @Transactional
     public void deletar(Long id) {
         if (!petRepository.existsById(id)) {
             throw new RuntimeException("Pet não encontrado");

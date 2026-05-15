@@ -1,6 +1,6 @@
 package com.fiap.challengepetcenter.controller;
 
-import com.fiap.challengepetcenter.model.Registro;
+import com.fiap.challengepetcenter.DTO.*;
 import com.fiap.challengepetcenter.service.RegistroService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,32 +12,33 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/registros/")
+@RequestMapping("/api/registros")
 public class RegistroController {
 
     @Autowired
     private RegistroService registroService;
 
     @PostMapping
-    public ResponseEntity<Registro> criar(@Valid @RequestBody Registro registro) {
-        Registro novoDiarioEntrada = registroService.salvar(registro);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoDiarioEntrada);
+    public ResponseEntity<RegistroResponseDTO> criar(@Valid @RequestBody RegistroRequestDTO requestDTO) {
+        RegistroResponseDTO novoRegistro = registroService.salvar(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoRegistro);
     }
 
     @GetMapping
-    public ResponseEntity<List<Registro>> listarTodos() {
-        return ResponseEntity.ok(registroService.listarTodos());
+    public ResponseEntity<List<RegistroResponseDTO>> listarTodos() {
+        List<RegistroResponseDTO> registros = registroService.listarTodos();
+        return ResponseEntity.ok(registros);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Registro> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<RegistroResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(registroService.buscarPorId(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Registro> atualizar(@PathVariable Long id,
-                                              @Valid @RequestBody Registro registroAtualizado) {
-        return ResponseEntity.ok(registroService.atualizar(id, registroAtualizado));
+    public ResponseEntity<RegistroResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody RegistroRequestDTO requestDTO) {
+        RegistroResponseDTO registroAtualizado = registroService.atualizar(id, requestDTO);
+        return ResponseEntity.ok(registroAtualizado);
     }
 
     @DeleteMapping("/{id}")

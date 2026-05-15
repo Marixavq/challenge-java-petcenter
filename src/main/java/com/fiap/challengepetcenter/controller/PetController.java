@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.controller;
 
-import com.fiap.challengepetcenter.model.Pet;
+import com.fiap.challengepetcenter.DTO.PetRequestDTO;
+import com.fiap.challengepetcenter.DTO.PetResponseDTO;
 import com.fiap.challengepetcenter.service.PetService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,35 +19,37 @@ public class PetController {
     private PetService petService;
 
     @PostMapping
-    public ResponseEntity<Pet> criar(@Valid @RequestBody Pet pet) {
-        Pet novoPet = petService.salvar(pet);
+    public ResponseEntity<PetResponseDTO> criar(@Valid @RequestBody PetRequestDTO requestDTO) {
+        PetResponseDTO novoPet = petService.salvar(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoPet);
     }
 
     @GetMapping
-    public ResponseEntity<List<Pet>> listarTodos() {
-        return ResponseEntity.ok(petService.listarTodos());
+    public ResponseEntity<List<PetResponseDTO>> listarTodos() {
+        List<PetResponseDTO> pets = petService.listarTodos();
+        return ResponseEntity.ok(pets);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Pet> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<PetResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(petService.buscarPorId(id));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Pet>> buscarPorUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(petService.buscarPorUserId(userId));
+    public ResponseEntity<List<PetResponseDTO>> buscarPorUserId(@PathVariable Long userId) {
+        List<PetResponseDTO> pets = petService.buscarPorUserId(userId);
+        return ResponseEntity.ok(pets);
     }
 
     @GetMapping("/nome/{nome}")
-    public ResponseEntity<List<Pet>> buscarPorNome(@PathVariable String nome) {
+    public ResponseEntity<List<PetResponseDTO>> buscarPorNome(@PathVariable String nome) {
         return ResponseEntity.ok(petService.buscarPorNome(nome));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Pet> atualizar(@PathVariable Long id,
-                                         @Valid @RequestBody Pet petAtualizado) {
-        return ResponseEntity.ok(petService.atualizar(id, petAtualizado));
+    public ResponseEntity<PetResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody PetRequestDTO requestDTO) {
+        PetResponseDTO petAtualizado = petService.atualizar(id, requestDTO);
+        return ResponseEntity.ok(petAtualizado);
     }
 
     @DeleteMapping("/{id}")

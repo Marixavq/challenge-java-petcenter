@@ -33,6 +33,8 @@ public class UserService {
         user.setSenha(requestDTO.senha());
         user.setTelefone(requestDTO.telefone());
         user.setTipoUsuario(requestDTO.tipoUsuario());
+        
+        user.setAtivo(true);
 
         User userSalvo = userRepository.save(user);
 

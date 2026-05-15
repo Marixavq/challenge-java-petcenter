@@ -1,6 +1,9 @@
 package com.fiap.challengepetcenter.service;
 
-import com.fiap.challengepetcenter.DTO.*;
+import com.fiap.challengepetcenter.DTO.DiarioEntradaRequestDTO;
+import com.fiap.challengepetcenter.DTO.DiarioEntradaResponseDTO;
+import com.fiap.challengepetcenter.exception.DiarioEntradaNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.PetNaoEncontradoException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
@@ -28,7 +31,7 @@ public class DiarioEntradaService {
     @Transactional
     public DiarioEntradaResponseDTO salvar(DiarioEntradaRequestDTO requestDTO) {
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+                .orElseThrow(() -> new PetNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         DiarioEntrada diarioEntrada = new DiarioEntrada();
         diarioEntrada.setPet(pet);
@@ -55,7 +58,7 @@ public class DiarioEntradaService {
     @Transactional(readOnly = true)
     public DiarioEntradaResponseDTO buscarPorId(Long id) {
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado"));
+                .orElseThrow(() -> new DiarioEntradaNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
         return DiarioEntradaResponseDTO.fromEntity(diarioEntrada);
     }
 
@@ -71,10 +74,10 @@ public class DiarioEntradaService {
     @Transactional
     public DiarioEntradaResponseDTO atualizar(Long id, DiarioEntradaRequestDTO requestDTO) {
         DiarioEntrada diarioEntradaExistente = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado"));
+                .orElseThrow(() -> new DiarioEntradaNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+                .orElseThrow(() -> new PetNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         diarioEntradaExistente.setPet(pet);
         diarioEntradaExistente.setData(requestDTO.data());
@@ -92,7 +95,7 @@ public class DiarioEntradaService {
     @Transactional
     public void deletar(Long id) {
         if (!diarioEntradaRepository.existsById(id)) {
-            throw new RuntimeException("DiarioEntrada não encontrado");
+            throw new DiarioEntradaNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id);
         }
         diarioEntradaRepository.deleteById(id);
     }

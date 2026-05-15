@@ -2,10 +2,11 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.PetRequestDTO;
 import com.fiap.challengepetcenter.DTO.PetResponseDTO;
+import com.fiap.challengepetcenter.exception.PetNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.UserNaoEncontradoException;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.PetRepository;
-
 import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class PetService {
     @Transactional
     public PetResponseDTO salvar(PetRequestDTO requestDTO) {
         User user = userRepository.findById(requestDTO.userId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNaoEncontradoException("Usuário não encontrado com ID: " + requestDTO.userId()));
 
         Pet pet = new Pet();
         pet.setUser(user);
@@ -56,7 +57,7 @@ public class PetService {
     @Transactional(readOnly = true)
     public PetResponseDTO buscarPorId(Long id) {
         Pet pet = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+                .orElseThrow(() -> new PetNaoEncontradoException("Pet não encontrado com ID: " + id));
         return PetResponseDTO.fromEntity(pet);
     }
 
@@ -81,10 +82,10 @@ public class PetService {
     @Transactional
     public PetResponseDTO atualizar(Long id, PetRequestDTO requestDTO) {
         Pet petExistente = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+                .orElseThrow(() -> new PetNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         User user = userRepository.findById(requestDTO.userId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNaoEncontradoException("Usuário não encontrado com ID: " + requestDTO.userId()));
 
         petExistente.setUser(user);
         petExistente.setNome(requestDTO.nome());
@@ -101,7 +102,7 @@ public class PetService {
     @Transactional
     public void deletar(Long id) {
         if (!petRepository.existsById(id)) {
-            throw new RuntimeException("Pet não encontrado");
+            throw new PetNaoEncontradoException("Pet não encontrado com ID: " + id);
         }
         petRepository.deleteById(id);
     }

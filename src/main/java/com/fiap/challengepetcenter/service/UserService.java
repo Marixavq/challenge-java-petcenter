@@ -2,6 +2,8 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.UserRequestDTO;
 import com.fiap.challengepetcenter.DTO.UserResponseDTO;
+import com.fiap.challengepetcenter.exception.UserNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.ValidacaoException;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ public class UserService {
     @Transactional
     public UserResponseDTO salvar(UserRequestDTO requestDTO) {
         if (userRepository.existsByEmail(requestDTO.email())) {
-            throw new RuntimeException("Email já cadastrado");
+            throw new ValidacaoException("Email já cadastrado");
         }
 
         User user = new User();
@@ -33,7 +35,7 @@ public class UserService {
         user.setSenha(requestDTO.senha());
         user.setTelefone(requestDTO.telefone());
         user.setTipoUsuario(requestDTO.tipoUsuario());
-        
+
         user.setAtivo(true);
 
         User userSalvo = userRepository.save(user);
@@ -53,21 +55,21 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponseDTO buscarPorId(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNaoEncontradoException("Usuário não encontrado com ID: " + id));
         return UserResponseDTO.fromEntity(user);
     }
 
     @Transactional(readOnly = true)
     public UserResponseDTO buscarPorEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNaoEncontradoException("Usuário não encontrado com email: " + email));
         return UserResponseDTO.fromEntity(user);
     }
 
     @Transactional
     public UserResponseDTO atualizar(Long id, UserRequestDTO requestDTO) {
         User userExistente = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNaoEncontradoException("Usuário não encontrado com ID: " + id));
         userExistente.setNome(requestDTO.nome());
         userExistente.setEmail(requestDTO.email());
         userExistente.setSenha(requestDTO.senha());
@@ -82,7 +84,7 @@ public class UserService {
     @Transactional
     public void deletar(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Usuário não encontrado");
+            throw new UserNaoEncontradoException("Usuário não encontrado com ID: " + id);
         }
         userRepository.deleteById(id);
     }

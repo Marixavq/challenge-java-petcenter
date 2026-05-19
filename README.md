@@ -12,6 +12,7 @@ A proposta vai além de um simples CRUD, permitindo:
 - apoio ao acompanhamento veterinário;
 - futura geração de insights clínicos.
 ---
+
 ## 🛠 Tecnologias Utilizadas
 - Java 21
 - Spring Boot
@@ -24,6 +25,7 @@ A proposta vai além de um simples CRUD, permitindo:
 - Swagger/OpenAPI
 - Git & GitHub
 ---
+
 ## 📂 Estrutura do Projeto
 
 O projeto foi estruturado utilizando arquitetura em camadas:
@@ -42,6 +44,7 @@ Estrutura em pastas:
             service
             ChallengepetcenterApplication.java
 ---
+
 ## 📌 Funcionalidades Implementadas
 ### Usuários
 - Cadastro de usuários
@@ -68,6 +71,7 @@ Estrutura em pastas:
   - sintomas
   - atividades
 ---
+
 ## 🔗 Relacionamentos
 ```text
 User
@@ -75,15 +79,8 @@ User
        └── DiarioEntrada
               └── Registro
 ```
+---
 
----
-## 🌐 API REST
-A API segue os princípios RESTful utilizando:
-- GET
-- POST
-- PUT
-- DELETE
----
 ## 📌 Exemplos de Endpoints
 ### Usuários
 ```http
@@ -111,35 +108,37 @@ As requisições exportadas serão disponibilizadas na pasta:
 /documentos
 ```
 ---
+
 ## ▶ Como Executar o Projeto
 ### 1. Clonar o repositório
 ```bash
 git clone <https://github.com/Marixavq/challenge-java-petcenter>
 ```
----
+
 ### 2. Abrir no IntelliJ IDEA
 Importar como projeto Maven.
----
+
 ### 3. Executar a aplicação
 Rodar a classe principal:
 ```java
 @SpringBootApplication
 ```
----
+--
 ### 4. Acessar API
 ```text
 http://localhost:8080
 ```
-
 ---
+
 ## 👨‍💻 Equipe
-Este projeto foi desenvolvido para a disciplina de Java Advanced, mas se conecta diretamente a outras disciplinas desenvolvidas por outros integrantes:
 - [ArthurCPV](https://github.com/ArthurCPV)
 - [JuliaTButtler](https://github.com/JuliaTButtler)
 - [Marixavq](https://github.com/Marixavq)
 - [TaikaWaititi](https://github.com/TaikaWaititi)
 - [ZeDio](https://github.com/ZeDio)
 
+Este projeto foi desenvolvido para a disciplina de Java Advanced, mas se conecta diretamente a outras disciplinas desenvolvidas por outros integrantes.
+
 ---
-# 📄 Endereço do projeto
-[Link do projeto no GitHub](https://github.com/Marixavq/challenge-java-petcenter)
+## 📄 Endereço do projeto
+Link do projeto no GitHub: https://github.com/Marixavq/challenge-java-petcenter

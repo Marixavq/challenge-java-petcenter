@@ -51,19 +51,19 @@ Estrutura em pastas:
 - Busca de usuários
 - Atualização de usuários
 - Remoção de usuários
---
+  
 ### Pets
 - Cadastro de pets
 - Relacionamento entre tutor e pet
 - Busca de pets
 - Atualização de pets
 - Remoção de pets
---
+
 ### Diário de Entradas
 - Registro diário da rotina do pet
 - Organização temporal das informações
 - Resumos e observações gerais
---
+
 ### Registros
 - Registro estruturado de:
   - alimentação
@@ -103,7 +103,7 @@ Para mais detalhes dos endpoints acesse: http://localhost:8080/swagger-ui/index.
 ## 🧪 Testes da API
 Os testes dos endpoints foram realizados utilizando:
 - Insomnia
-As requisições exportadas serão disponibilizadas na pasta:
+- As requisições exportadas serão disponibilizadas na pasta:
 ```text
 /documentos
 ```
@@ -112,7 +112,7 @@ As requisições exportadas serão disponibilizadas na pasta:
 ## ▶ Como Executar o Projeto
 ### 1. Clonar o repositório
 ```bash
-git clone <https://github.com/Marixavq/challenge-java-petcenter>
+git clone https://github.com/Marixavq/challenge-java-petcenter
 ```
 
 ### 2. Abrir no IntelliJ IDEA
@@ -123,7 +123,6 @@ Rodar a classe principal:
 ```java
 @SpringBootApplication
 ```
---
 ### 4. Acessar API
 ```text
 http://localhost:8080

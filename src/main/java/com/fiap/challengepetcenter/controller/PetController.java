@@ -2,6 +2,7 @@ package com.fiap.challengepetcenter.controller;
 
 import com.fiap.challengepetcenter.DTO.PetRequestDTO;
 import com.fiap.challengepetcenter.DTO.PetResponseDTO;
+import com.fiap.challengepetcenter.DTO.UserResponseDTO;
 import com.fiap.challengepetcenter.service.PetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,6 +12,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +61,15 @@ public class PetController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PetResponseDTO.class)
             )
     )
-    public ResponseEntity<List<PetResponseDTO>> listarTodos() {
-        List<PetResponseDTO> pets = petService.listarTodos();
+    public ResponseEntity<Page<PetResponseDTO>> listarTodos(
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+        Page<PetResponseDTO> pets = petService.listarTodos(pageable);
         return ResponseEntity.ok(pets);
     }
 
@@ -95,8 +107,16 @@ public class PetController {
                     description = "Usuário não encontrado"
             )
     })
-    public ResponseEntity<List<PetResponseDTO>> buscarPorUserId(@PathVariable Long userId) {
-        List<PetResponseDTO> pets = petService.buscarPorUserId(userId);
+    public ResponseEntity<Page<PetResponseDTO>> buscarPorUserId(
+            @PathVariable Long userId,
+
+            @PageableDefault(
+                    size = 10,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+        Page<PetResponseDTO> pets = petService.buscarPorUserId(userId, pageable);
         return ResponseEntity.ok(pets);
     }
 
@@ -111,8 +131,18 @@ public class PetController {
                     description = "Pets encontrados com sucesso"
             )
     })
-    public ResponseEntity<List<PetResponseDTO>> buscarPorNome(@PathVariable String nome) {
-        return ResponseEntity.ok(petService.buscarPorNome(nome));
+
+    public ResponseEntity<Page<PetResponseDTO>> buscarPorNome(
+            @PathVariable String nome,
+
+            @PageableDefault(
+                    size = 10,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+        Page<PetResponseDTO> pets = petService.buscarPorNome(nome, pageable);
+        return ResponseEntity.ok(pets);
     }
 
     @PutMapping("/{id}")

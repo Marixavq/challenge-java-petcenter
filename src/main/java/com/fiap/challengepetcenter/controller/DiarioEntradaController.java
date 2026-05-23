@@ -14,6 +14,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,8 +61,16 @@ public class DiarioEntradaController {
             description = "Lista de entradas no diário retornada com sucesso!!!",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = DiarioEntradaResponseDTO.class))
     )
-    public ResponseEntity<List<DiarioEntradaResponseDTO>> listarTodos() {
-        List<DiarioEntradaResponseDTO> entradas = diarioEntradaService.listarTodos();
+
+    public ResponseEntity<Page<DiarioEntradaResponseDTO>> listarTodos(
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+        Page<DiarioEntradaResponseDTO> entradas = diarioEntradaService.listarTodos(pageable);
         return ResponseEntity.ok(entradas);
     }
 
@@ -89,8 +101,18 @@ public class DiarioEntradaController {
             responseCode = "200",
             description = "Entradas encontradas com sucesso"
     )
-    public ResponseEntity<List<DiarioEntradaResponseDTO>> buscarPorData(@RequestParam LocalDate data) {
-        return ResponseEntity.ok(diarioEntradaService.buscarPorData(data));
+    public ResponseEntity<Page<DiarioEntradaResponseDTO>> buscarPorData(
+            @RequestParam LocalDate data,
+
+            @PageableDefault(
+                    size = 10,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+
+        Page<DiarioEntradaResponseDTO> entradas = diarioEntradaService.buscarPorData(data, pageable);
+        return ResponseEntity.ok(entradas);
     }
 
     @PutMapping("/{id}")

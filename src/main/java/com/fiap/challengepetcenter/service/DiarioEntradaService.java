@@ -2,16 +2,20 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.DiarioEntradaRequestDTO;
 import com.fiap.challengepetcenter.DTO.DiarioEntradaResponseDTO;
+import com.fiap.challengepetcenter.DTO.UserResponseDTO;
 import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
 import com.fiap.challengepetcenter.exception.DiarioEntradaNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.PetNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.RegistroComDependenciasException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
+import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +56,11 @@ public class DiarioEntradaService {
 
 
     @Transactional(readOnly = true)
-    public List<DiarioEntradaResponseDTO> listarTodos() {
-        List<DiarioEntrada> entradas = diarioEntradaRepository.findAll();
+    public Page<DiarioEntradaResponseDTO> listarTodos(Pageable pageable) {
+        Page<DiarioEntrada> entradas = diarioEntradaRepository.findAll(pageable);
 
-        return entradas.stream()
-                .map(DiarioEntradaResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        return entradas.map(DiarioEntradaResponseDTO::fromEntity);
+
     }
 
     @Transactional(readOnly = true)
@@ -68,12 +71,10 @@ public class DiarioEntradaService {
     }
 
     @Transactional(readOnly = true)
-    public List<DiarioEntradaResponseDTO> buscarPorData(LocalDate data) {
-        List<DiarioEntrada> entradas = diarioEntradaRepository.findByData(data);
+    public Page<DiarioEntradaResponseDTO> buscarPorData(LocalDate data, Pageable pageable) {
+        Page<DiarioEntrada> entradas = diarioEntradaRepository.findByData(data, pageable);
 
-        return entradas.stream()
-                .map(DiarioEntradaResponseDTO::fromEntity)
-                .toList();
+        return entradas.map(DiarioEntradaResponseDTO::fromEntity);
     }
 
     @Transactional

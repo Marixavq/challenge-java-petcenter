@@ -13,6 +13,8 @@ import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +54,10 @@ public class PetService {
     }
 
     @Transactional(readOnly = true)
-    public List<PetResponseDTO> listarTodos() {
-        List<Pet> pets = petRepository.findAll();
+    public Page<PetResponseDTO> listarTodos(Pageable pageable) {
 
-        return pets.stream()
-                .map(PetResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        return petRepository.findAll(pageable)
+                .map(PetResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
@@ -68,21 +68,17 @@ public class PetService {
     }
 
     @Transactional(readOnly = true)
-    public List<PetResponseDTO> buscarPorUserId(Long userId) {
+    public Page<PetResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
 
-        List<Pet> pets = petRepository.findByUserId(userId);
-        return pets.stream()
-                .map(PetResponseDTO::fromEntity)
-                .toList();
+        return petRepository.findByUserId(userId, pageable)
+                .map(PetResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public List<PetResponseDTO> buscarPorNome(String nome) {
+    public Page<PetResponseDTO> buscarPorNome(String nome, Pageable pageable) {
 
-        List<Pet> pets = petRepository.findByNome(nome);
-        return pets.stream()
-                .map(PetResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        return petRepository.findByNomeContaining(nome, pageable)
+                .map(PetResponseDTO::fromEntity);
     }
 
     @Transactional

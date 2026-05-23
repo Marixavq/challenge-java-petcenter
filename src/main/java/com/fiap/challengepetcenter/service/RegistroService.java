@@ -9,6 +9,8 @@ import com.fiap.challengepetcenter.model.Registro;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,12 +48,10 @@ public class RegistroService {
     }
 
     @Transactional(readOnly = true)
-    public List<RegistroResponseDTO> listarTodos() {
-        List<Registro> registros = registroRepository.findAll();
+    public Page<RegistroResponseDTO> listarTodos(Pageable pageable) {
+        Page<Registro> registros = registroRepository.findAll(pageable);
 
-        return registros.stream()
-                .map(RegistroResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        return registros.map(RegistroResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)

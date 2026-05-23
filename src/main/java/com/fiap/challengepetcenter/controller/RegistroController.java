@@ -10,6 +10,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +60,16 @@ public class RegistroController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = RegistroResponseDTO.class)
             )
     )
-    public ResponseEntity<List<RegistroResponseDTO>> listarTodos() {
-        List<RegistroResponseDTO> registros = registroService.listarTodos();
+
+    public ResponseEntity<Page<RegistroResponseDTO>> listarTodos(
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+        Page<RegistroResponseDTO> registros = registroService.listarTodos(pageable);
         return ResponseEntity.ok(registros);
     }
 

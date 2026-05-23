@@ -4,5 +4,5 @@ import com.fiap.challengepetcenter.model.Registro;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RegistroRepository extends JpaRepository<Registro, Long> {
-    boolean existsByRegistroId(Long id);
+    boolean existsById(Long id);
 }

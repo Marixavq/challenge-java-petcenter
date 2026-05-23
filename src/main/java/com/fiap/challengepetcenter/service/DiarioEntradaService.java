@@ -103,7 +103,7 @@ public class DiarioEntradaService {
             throw new DiarioEntradaNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id);
         }
 
-        if (registroRepository.existsByRegistroId(id)) {
+        if (registroRepository.existsById(id)) {
             throw new RegistroComDependenciasException("Não é possível excluir o pet pois existem DiarioEntradas vinculados a ele");
         }
 

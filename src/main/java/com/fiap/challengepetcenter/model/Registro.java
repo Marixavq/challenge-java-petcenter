@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "resgistros")
+@Table(name = "registros")
 @Schema(
         name = "Registro",
         description = "Representa um registro associado a uma entrada no diário no sistema API PetCenter"

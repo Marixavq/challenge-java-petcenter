@@ -2,12 +2,15 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.DiarioEntradaRequestDTO;
 import com.fiap.challengepetcenter.DTO.DiarioEntradaResponseDTO;
+import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
 import com.fiap.challengepetcenter.exception.DiarioEntradaNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.PetNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.RegistroComDependenciasException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
+import com.fiap.challengepetcenter.repository.RegistroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +24,13 @@ public class DiarioEntradaService {
 
     private final DiarioEntradaRepository diarioEntradaRepository;
     private final PetRepository petRepository;
+    private final RegistroRepository registroRepository;
 
     @Autowired
-    public DiarioEntradaService(DiarioEntradaRepository diarioEntradaRepository, PetRepository petRepository) {
+    public DiarioEntradaService(DiarioEntradaRepository diarioEntradaRepository, PetRepository petRepository, RegistroRepository registroRepository) {
         this.diarioEntradaRepository = diarioEntradaRepository;
         this.petRepository = petRepository;
+        this.registroRepository = registroRepository;
     }
 
     @Transactional
@@ -97,6 +102,11 @@ public class DiarioEntradaService {
         if (!diarioEntradaRepository.existsById(id)) {
             throw new DiarioEntradaNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id);
         }
+
+        if (registroRepository.existsByRegistroId(id)) {
+            throw new RegistroComDependenciasException("Não é possível excluir o pet pois existem DiarioEntradas vinculados a ele");
+        }
+
         diarioEntradaRepository.deleteById(id);
     }
 }

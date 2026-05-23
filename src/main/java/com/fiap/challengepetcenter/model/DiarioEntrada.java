@@ -25,7 +25,7 @@ public class DiarioEntrada {
     )
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
     @NotNull(message = "O pet é obrigatório")
     @Schema(
@@ -75,7 +75,7 @@ public class DiarioEntrada {
             example = "Concluído"
     )
     private String status;
-    
+
     public DiarioEntrada() {
     }
 

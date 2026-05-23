@@ -22,7 +22,7 @@ public class Pet {
     )
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull(message = "O tutorId é obrigatório")
     @Schema(

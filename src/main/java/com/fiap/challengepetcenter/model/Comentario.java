@@ -9,4 +9,6 @@ public class Comentario {
     private String comentario;
     private LocalDateTime criadoEm;
     private LocalDateTime editadoEm;
+
+
 }

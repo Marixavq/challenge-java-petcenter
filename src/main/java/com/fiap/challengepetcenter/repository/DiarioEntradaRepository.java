@@ -9,4 +9,6 @@ import java.util.List;
 public interface DiarioEntradaRepository extends JpaRepository<DiarioEntrada, Long> {
 
     List<DiarioEntrada> findByData(LocalDate data);
+
+    boolean existsByPetId(Long id);
 }

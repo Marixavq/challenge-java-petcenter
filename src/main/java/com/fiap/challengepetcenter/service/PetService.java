@@ -2,11 +2,15 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.PetRequestDTO;
 import com.fiap.challengepetcenter.DTO.PetResponseDTO;
+import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
 import com.fiap.challengepetcenter.exception.PetNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.UserComDependenciasException;
 import com.fiap.challengepetcenter.exception.UserNaoEncontradoException;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
+import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
+import com.fiap.challengepetcenter.repository.RegistroRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,11 +24,13 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final UserRepository userRepository;
+    private final DiarioEntradaRepository diarioEntradaRepository;
 
     @Autowired
-    public PetService(PetRepository petRepository, UserRepository userRepository) {
+    public PetService(PetRepository petRepository, UserRepository userRepository, DiarioEntradaRepository diarioEntradaRepository) {
         this.petRepository = petRepository;
         this.userRepository = userRepository;
+        this.diarioEntradaRepository = diarioEntradaRepository;
     }
 
     @Transactional
@@ -104,6 +110,11 @@ public class PetService {
         if (!petRepository.existsById(id)) {
             throw new PetNaoEncontradoException("Pet não encontrado com ID: " + id);
         }
+
+        if (diarioEntradaRepository.existsByPetId(id)) {
+            throw new DiarioEntradaComDependenciasException("Não é possível excluir o pet pois existem entradas de diário vinculadas a ele");
+        }
         petRepository.deleteById(id);
+
     }
 }

@@ -2,9 +2,11 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.UserRequestDTO;
 import com.fiap.challengepetcenter.DTO.UserResponseDTO;
+import com.fiap.challengepetcenter.exception.UserComDependenciasException;
 import com.fiap.challengepetcenter.exception.UserNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.ValidacaoException;
 import com.fiap.challengepetcenter.model.User;
+import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,12 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PetRepository petRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PetRepository petRepository) {
         this.userRepository = userRepository;
+        this.petRepository = petRepository;
     }
 
     @Transactional
@@ -85,6 +89,10 @@ public class UserService {
     public void deletar(Long id) {
         if (!userRepository.existsById(id)) {
             throw new UserNaoEncontradoException("Usuário não encontrado com ID: " + id);
+        }
+
+        if (petRepository.existsByUserId(id)) {
+            throw new UserComDependenciasException("Não é possível excluir o usuário pois existem pets vinculados a ele");
         }
         userRepository.deleteById(id);
     }

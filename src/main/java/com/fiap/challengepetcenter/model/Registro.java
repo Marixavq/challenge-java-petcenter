@@ -24,7 +24,7 @@ public class Registro {
     )
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entrada_id", nullable = false)
     @NotNull(message = "O ID da entrada é obrigatório")
     @Schema(

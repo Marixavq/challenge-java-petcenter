@@ -2,7 +2,7 @@
 
 ## 📌 Objetivo do Projeto
 Este projeto está sendo desenvolvido por estudantes de Análise e Desenvolvimento de Sistemas da FIAP para o Challenge proposto pela Clyvo.
-O objetivo do sistema fazer o acompanhamento do pet e identificar possíveis anomalias comportamentais, a fim de procurar tratamentos de saúde rápidamente antes que o problema se agrave.
+O objetivo do sistema é realizar o acompanhamento do pet e identificar possíveis anomalias comportamentais, permitindo a busca por tratamentos de saúde rapidamente antes que o problema se agrave.
 Também tem o objetivo de transformar registros cotidianos do pet em informações organizadas e analisáveis ao longo do tempo.
 
 A proposta vai além de um simples CRUD, permitindo:
@@ -136,7 +136,7 @@ http://localhost:8080
 - [TaikaWaititi](https://github.com/TaikaWaititi)
 - [ZeDio](https://github.com/ZeDio)
 
-Este projeto foi desenvolvido para a disciplina de Java Advanced, mas se conecta diretamente a outras disciplinas desenvolvidas por outros integrantes.
+Este projeto foi desenvolvido para a disciplina de Java Advanced e integra conceitos aplicados em outras disciplinas do Challenge interdisciplinar da FIAP.
 
 ---
 ## 📄 Endereço do projeto

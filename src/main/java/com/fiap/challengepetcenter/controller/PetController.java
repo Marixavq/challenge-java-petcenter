@@ -2,7 +2,6 @@ package com.fiap.challengepetcenter.controller;
 
 import com.fiap.challengepetcenter.DTO.PetRequestDTO;
 import com.fiap.challengepetcenter.DTO.PetResponseDTO;
-import com.fiap.challengepetcenter.DTO.UserResponseDTO;
 import com.fiap.challengepetcenter.service.PetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,8 +18,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/pets")

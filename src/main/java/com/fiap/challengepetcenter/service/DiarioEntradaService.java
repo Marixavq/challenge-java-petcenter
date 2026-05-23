@@ -2,14 +2,11 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.DTO.DiarioEntradaRequestDTO;
 import com.fiap.challengepetcenter.DTO.DiarioEntradaResponseDTO;
-import com.fiap.challengepetcenter.DTO.UserResponseDTO;
-import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
 import com.fiap.challengepetcenter.exception.DiarioEntradaNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.PetNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.RegistroComDependenciasException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
-import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
@@ -20,8 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DiarioEntradaService {

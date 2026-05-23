@@ -2,9 +2,6 @@ package com.fiap.challengepetcenter.controller;
 
 import com.fiap.challengepetcenter.DTO.DiarioEntradaRequestDTO;
 import com.fiap.challengepetcenter.DTO.DiarioEntradaResponseDTO;
-import com.fiap.challengepetcenter.DTO.PetRequestDTO;
-import com.fiap.challengepetcenter.DTO.PetResponseDTO;
-import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.service.DiarioEntradaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/diarioentradas")

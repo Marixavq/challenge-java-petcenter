@@ -4,22 +4,18 @@ import com.fiap.challengepetcenter.DTO.PetRequestDTO;
 import com.fiap.challengepetcenter.DTO.PetResponseDTO;
 import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
 import com.fiap.challengepetcenter.exception.PetNaoEncontradoException;
-import com.fiap.challengepetcenter.exception.UserComDependenciasException;
 import com.fiap.challengepetcenter.exception.UserNaoEncontradoException;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
-import com.fiap.challengepetcenter.repository.RegistroRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.cache.annotation.Cacheable;
 
 @Service
 public class PetService {
@@ -55,7 +51,6 @@ public class PetService {
 
     @Transactional(readOnly = true)
     public Page<PetResponseDTO> listarTodos(Pageable pageable) {
-
         return petRepository.findAll(pageable)
                 .map(PetResponseDTO::fromEntity);
     }

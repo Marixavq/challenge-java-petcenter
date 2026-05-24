@@ -100,14 +100,6 @@ GET /api/pets
 Para mais detalhes dos endpoints acesse: http://localhost:8080/swagger-ui/index.html com o projeto em execução.
 
 ---
-## 🧪 Testes da API
-Os testes dos endpoints foram realizados utilizando:
-- Insomnia
-- As requisições exportadas serão disponibilizadas na pasta:
-```text
-/documentos
-```
----
 
 ## ▶ Como Executar o Projeto
 ### 1. Clonar o repositório
@@ -139,5 +131,6 @@ http://localhost:8080
 Este projeto foi desenvolvido para a disciplina de Java Advanced e integra conceitos aplicados em outras disciplinas do Challenge interdisciplinar da FIAP.
 
 ---
-## 📄 Endereço do projeto
+## 📄 Endereços do projeto
 Link do projeto no GitHub: https://github.com/Marixavq/challenge-java-petcenter
+Link do projeto no Render: https://challenge-java-petcenter.onrender.com

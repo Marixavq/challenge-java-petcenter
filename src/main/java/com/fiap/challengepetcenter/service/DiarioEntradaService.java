@@ -99,7 +99,7 @@ public class DiarioEntradaService {
         }
 
         if (registroRepository.existsById(id)) {
-            throw new RegistroComDependenciasException("Não é possível excluir o pet pois existem DiarioEntradas vinculados a ele");
+            throw new RegistroComDependenciasException("Não é possível excluir o DiarioEntrada pois existem registros vinculados a ele");
         }
 
         diarioEntradaRepository.deleteById(id);

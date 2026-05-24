@@ -131,7 +131,7 @@ Para mais detalhes dos endpoints acesse: http://localhost:8080/swagger-ui/index.
 Os testes dos endpoints foram realizados utilizando:
 
 - Insomnia
-- As requisições exportadas serão disponibilizadas na pasta:
+- Para mais detalhes acesse a seguinte pasta na raiz do projeto:
 
 ```text
 /documentos

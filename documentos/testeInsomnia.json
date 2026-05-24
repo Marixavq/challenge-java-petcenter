@@ -1,0 +1,42 @@
+// POST - Users
+
+{
+  "nome": "João Silva",
+  "email": "joao@email.com",
+  "senha": "123456",
+  "telefone": "11 94002-8922",
+  "tipoUsuario": "Tutor"
+}
+
+//POST - Pets
+
+{
+  "userId": 1,
+  "nome": "Luna",
+  "especie": "Cachorro",
+  "raca": "Golden Retriever",
+  "dataNascimento": "2022-03-15",
+  "observacoes": "Pet alérgico a determinados alimentos"
+}
+
+
+//POST - DiarioEntradas
+
+{
+  "petId": 1,
+  "data": "2026-05-17",
+  "resumo": "Pet se alimentou bem e apresentou comportamento tranquilo",
+  "humorGeral": "Calmo",
+  "status": "Concluído"
+}
+
+
+//POST - Registros
+{
+  "entradaId": 1,
+  "tipo": "Alimentação",
+  "subtipo": "Ração seca",
+  "valor": 250,
+  "unidade": "gramas",
+  "nota": "Pet comeu normalmente"
+}

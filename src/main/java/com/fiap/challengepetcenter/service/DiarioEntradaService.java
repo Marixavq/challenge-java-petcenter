@@ -82,7 +82,6 @@ public class DiarioEntradaService {
 
         diarioEntradaExistente.setPet(pet);
         diarioEntradaExistente.setData(requestDTO.data());
-        //diarioEntradaExistente.setAtualizadoEm(LocalDateTime.now());
         diarioEntradaExistente.setResumo(requestDTO.resumo());
         diarioEntradaExistente.setHumorGeral(requestDTO.humorGeral());
         diarioEntradaExistente.setStatus(requestDTO.status());

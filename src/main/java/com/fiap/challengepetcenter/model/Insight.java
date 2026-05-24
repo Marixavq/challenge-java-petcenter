@@ -3,7 +3,7 @@ package com.fiap.challengepetcenter.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class Insights {
+public class Insight {
     private Long id;
     private Pet pet;
     private String tipo;
@@ -17,10 +17,10 @@ public class Insights {
     private String status;
     private String contexto;
 
-    public Insights() {
+    public Insight() {
     }
 
-    public Insights(Long id, Pet pet, String tipo, String descricao, String origemRegra, String nivelAlerta, LocalDate dataInicio, LocalDate dataFim, LocalDateTime criadoEm, String geradoPor, String status, String contexto) {
+    public Insight(Long id, Pet pet, String tipo, String descricao, String origemRegra, String nivelAlerta, LocalDate dataInicio, LocalDate dataFim, LocalDateTime criadoEm, String geradoPor, String status, String contexto) {
         this.id = id;
         this.pet = pet;
         this.tipo = tipo;

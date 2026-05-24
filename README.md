@@ -79,6 +79,18 @@ User
        └── DiarioEntrada
               └── Registro
 ```
+### User
+Representa o tutor responsável pelos pets cadastrados no sistema.
+
+### Pet
+Representa o animal acompanhado pela aplicação.
+
+### DiarioEntrada
+Representa registros diários relacionados ao estado geral do pet.
+
+### Registro
+Representa informações específicas registradas durante uma entrada do diário.
+
 ---
 
 ## 📌 Exemplos de Endpoints

@@ -1,5 +1,6 @@
 package com.fiap.challengepetcenter.DTO;
 
+import com.fiap.challengepetcenter.model.TipoUsuario;
 import com.fiap.challengepetcenter.model.User;
 
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ public record UserResponseDTO(
         String nome,
         String email,
         String telefone,
-        String tipoUsuario,
+        TipoUsuario tipoUsuario,
         boolean ativo,
         LocalDateTime dataCriacao
 

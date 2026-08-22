@@ -1,10 +1,14 @@
 package com.fiap.challengepetcenter.DTO;
 
+import com.fiap.challengepetcenter.model.TipoUsuario;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record UserRequestDTO(
-        
+
         @Schema(
                 description = "Nome do usuário",
                 example = "João Silva"
@@ -39,10 +43,10 @@ public record UserRequestDTO(
 
         @Schema(
                 description = "Tipo do usuário",
-                example = "Tutor"
+                example = "TUTOR"
         )
-        @NotBlank(message = "Tipo é obrigatório")
-        String tipoUsuario
+        @NotNull(message = "Tipo de usuário é obrigatório")
+        TipoUsuario tipoUsuario
 
 ) {
 }

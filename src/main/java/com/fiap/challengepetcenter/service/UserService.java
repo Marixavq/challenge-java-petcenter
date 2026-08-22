@@ -11,6 +11,7 @@ import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +23,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PetRepository petRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PetRepository petRepository) {
+    public UserService(UserRepository userRepository, PetRepository petRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.petRepository = petRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -38,7 +41,7 @@ public class UserService {
         User user = new User();
         user.setNome(requestDTO.nome());
         user.setEmail(requestDTO.email());
-        user.setSenha(requestDTO.senha());
+        user.setSenha(passwordEncoder.encode(requestDTO.senha()));
         user.setTelefone(requestDTO.telefone());
         user.setTipoUsuario(requestDTO.tipoUsuario());
 

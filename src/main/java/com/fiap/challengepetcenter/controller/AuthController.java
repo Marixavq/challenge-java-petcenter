@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.controller;
 
 import com.fiap.challengepetcenter.DTO.LoginRequestDTO;
+import com.fiap.challengepetcenter.DTO.LoginResponseDTO;
 import com.fiap.challengepetcenter.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequestDTO request) {
-        authService.autenticar(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
+        return ResponseEntity.ok(authService.autenticar(request));
     }
 }

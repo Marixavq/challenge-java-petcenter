@@ -79,7 +79,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNaoEncontradoException("Usuário não encontrado com ID: " + id));
         userExistente.setNome(requestDTO.nome());
         userExistente.setEmail(requestDTO.email());
-        userExistente.setSenha(requestDTO.senha());
+        userExistente.setSenha(passwordEncoder.encode(requestDTO.senha()));
         userExistente.setTelefone(requestDTO.telefone());
         userExistente.setTipoUsuario(requestDTO.tipoUsuario());
 

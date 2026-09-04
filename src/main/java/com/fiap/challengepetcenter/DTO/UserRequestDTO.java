@@ -23,7 +23,7 @@ public record UserRequestDTO(
         )
         @NotBlank(message = "Email é obrigatório")
         @Email(message = "Email inválido")
-        @Size(max = 120, message = "O email deve ter no máximo 120 caracteres")
+        @Size(max = 150, message = "O email deve ter no máximo 150 caracteres")
         String email,
 
         @Schema(
@@ -38,7 +38,6 @@ public record UserRequestDTO(
                 description = "Telefone do usuário",
                 example = "11 94002-8922"
         )
-        @NotBlank(message = "Telefone obrigatório")
         String telefone,
 
         @Schema(

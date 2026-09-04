@@ -40,8 +40,8 @@ public class User {
 
     @NotBlank(message = "Email é obrigatório")
     @Email(message = "Email inválido")
-    @Size(min = 3, max = 120, message = "O email deve ter entre 3 e 120 caracteres")
-    @Column(unique = true, nullable = false, length = 120)
+    @Size(min = 3, max = 150, message = "O email deve ter entre 3 e 150 caracteres")
+    @Column(unique = true, nullable = false, length = 150)
     @Schema(
             description = "Email único do usuário",
             example = "joaosilva@email.com",
@@ -52,7 +52,7 @@ public class User {
     private String email;
 
     @NotBlank(message = "Senha é obrigatória")
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 255)
     @Schema(
             description = "Senha do usuário",
             example = "123642",
@@ -60,7 +60,6 @@ public class User {
     )
     private String senha;
 
-    @NotBlank(message = "Telefone obrigatório")
     @Column(nullable = false, length = 20)
     @Schema(
             description = "Telefone do usuário",

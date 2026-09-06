@@ -62,7 +62,6 @@ public class PetService {
 
     @Transactional(readOnly = true)
     public Page<PetResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
-
         return petRepository.findByUserId(userId, pageable)
                 .map(PetResponseDTO::fromEntity);
     }

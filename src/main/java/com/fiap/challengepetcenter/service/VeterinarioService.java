@@ -4,24 +4,31 @@ import com.fiap.challengepetcenter.DTO.VeterinarioRequestDTO;
 import com.fiap.challengepetcenter.DTO.VeterinarioResponseDTO;
 import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
 import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
+import com.fiap.challengepetcenter.model.TipoUsuario;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.model.Veterinario;
+import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import com.fiap.challengepetcenter.repository.VeterinarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class VeterinarioService {
 
     private final VeterinarioRepository veterinarioRepository;
     private final UserRepository userRepository;
+    private final PetVeterinarioRepository petVeterinarioRepository;
+
 
     @Autowired
-    public VeterinarioService(VeterinarioRepository veterinarioRepository, UserRepository userRepository) {
+    public VeterinarioService(VeterinarioRepository veterinarioRepository, UserRepository userRepository, PetVeterinarioRepository petVeterinarioRepository) {
         this.veterinarioRepository = veterinarioRepository;
         this.userRepository = userRepository;
+        this.petVeterinarioRepository = petVeterinarioRepository;
     }
 
     @Transactional
@@ -29,6 +36,10 @@ public class VeterinarioService {
         User user = userRepository.findById(requestDTO.userId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + requestDTO.userId()));
 
+        if (user.getTipoUsuario() != TipoUsuario.VETERINARIO) {
+            throw new RecursoNaoEncontradoException("O usuário informado não possui perfil de veterinário");
+        }
+        
         Veterinario veterinario = new Veterinario();
         veterinario.setUser(user);
         veterinario.setCrmv(requestDTO.crmv());
@@ -55,7 +66,6 @@ public class VeterinarioService {
 
     @Transactional(readOnly = true)
     public Page<VeterinarioResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
-
         return veterinarioRepository.findByUserId(userId, pageable)
                 .map(VeterinarioResponseDTO::fromEntity);
     }
@@ -65,7 +75,7 @@ public class VeterinarioService {
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id));
 
-        User user = userRepository.findById(VeterinarioRequestDTO.userId())
+        User user = userRepository.findById(requestDTO.userId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + requestDTO.userId()));
 
         veterinarioExistente.setUser(user);
@@ -84,11 +94,11 @@ public class VeterinarioService {
             throw new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id);
         }
 
-        if (petRepository.existsByVeterinarioId(id)) {
+        if (petVeterinarioRepository.existsByVeterinario_IdAndAtivo(id, true)) {
             throw new DiarioEntradaComDependenciasException("Não é possível excluir o veterinário pois existem pets vinculados a ele");
         }
-        veterinarioRepository.deleteById(id);
 
+        veterinarioRepository.deleteById(id);
     }
 
 }

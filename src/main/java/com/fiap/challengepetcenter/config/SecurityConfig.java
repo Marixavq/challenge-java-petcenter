@@ -111,8 +111,6 @@ public class SecurityConfig {
                         // Demais endpoints: precisam estar autenticados
                         .anyRequest().authenticated()
 
-                        .anyRequest().authenticated()
-
                 )
                 .addFilterBefore(
                         jwtAuthenticationFilter,

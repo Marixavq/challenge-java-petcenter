@@ -35,15 +35,15 @@ public class VeterinarioService {
 
     @Transactional
     public VeterinarioResponseDTO salvar(VeterinarioRequestDTO requestDTO) {
-        User user = userRepository.findById(requestDTO.userId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + requestDTO.userId()));
 
-        if (user.getTipoUsuario() != TipoUsuario.VETERINARIO) {
+        User usuarioLogado = getUsuarioAutenticado();
+
+        if (usuarioLogado.getTipoUsuario() != TipoUsuario.VETERINARIO) {
             throw new RecursoNaoEncontradoException("O usuário informado não possui perfil de veterinário");
         }
 
         Veterinario veterinario = new Veterinario();
-        veterinario.setUser(user);
+        veterinario.setUser(usuarioLogado);
         veterinario.setCrmv(requestDTO.crmv());
         veterinario.setEspecialidade(requestDTO.especialidade());
         veterinario.setDescricao(requestDTO.descricao());

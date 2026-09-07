@@ -7,14 +7,6 @@ import jakarta.validation.constraints.Size;
 
 public record VeterinarioRequestDTO(
 
-        @NotNull(message = "ID do usuário é obrigatório")
-        @Schema(
-                description = "ID do usuário associado ao veterinário",
-                example = "1",
-                required = true
-        )
-        Long userId,
-
         @NotBlank(message = "CRMV é obrigatório")
         @Size(min = 4, max = 20, message = "O CRMV deve ter entre 4 e 20 caracteres")
         @Schema(

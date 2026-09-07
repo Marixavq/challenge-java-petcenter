@@ -1,7 +1,7 @@
 package com.fiap.challengepetcenter.controller;
 
-import com.fiap.challengepetcenter.DTO.LoginRequestDTO;
-import com.fiap.challengepetcenter.DTO.LoginResponseDTO;
+import com.fiap.challengepetcenter.dto.request.LoginRequestDTO;
+import com.fiap.challengepetcenter.dto.response.LoginResponseDTO;
 import com.fiap.challengepetcenter.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

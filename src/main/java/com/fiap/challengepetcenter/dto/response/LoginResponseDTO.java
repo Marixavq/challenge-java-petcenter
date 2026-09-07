@@ -1,4 +1,4 @@
-package com.fiap.challengepetcenter.DTO;
+package com.fiap.challengepetcenter.dto.response;
 
 public record LoginResponseDTO(
         String token

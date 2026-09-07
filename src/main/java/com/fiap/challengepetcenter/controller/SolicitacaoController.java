@@ -1,8 +1,8 @@
 package com.fiap.challengepetcenter.controller;
 
 
-import com.fiap.challengepetcenter.DTO.SolicitacaoRequestDTO;
-import com.fiap.challengepetcenter.DTO.SolicitacaoResponseDTO;
+import com.fiap.challengepetcenter.dto.request.SolicitacaoRequestDTO;
+import com.fiap.challengepetcenter.dto.response.SolicitacaoResponseDTO;
 import com.fiap.challengepetcenter.service.SolicitacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

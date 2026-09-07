@@ -1,7 +1,7 @@
 package com.fiap.challengepetcenter.service;
 
-import com.fiap.challengepetcenter.DTO.SolicitacaoRequestDTO;
-import com.fiap.challengepetcenter.DTO.SolicitacaoResponseDTO;
+import com.fiap.challengepetcenter.dto.request.SolicitacaoRequestDTO;
+import com.fiap.challengepetcenter.dto.response.SolicitacaoResponseDTO;
 import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.*;
 import com.fiap.challengepetcenter.repository.*;
@@ -42,18 +42,17 @@ public class SolicitacaoService {
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
-        // Usuário autenticado pelo JWT
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        User usuarioLogado = getUsuarioAutenticado();
 
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode criar uma solicitação para o pet de outro usuário"
+            );
+        }
 
         Solicitacao solicitacao = new Solicitacao();
         solicitacao.setPet(pet);
-        solicitacao.setUser(user);
+        solicitacao.setUser(usuarioLogado);
         solicitacao.setVeterinario(veterinario);
         solicitacao.setMensagem(requestDTO.mensagem());
         solicitacao.setStatus(StatusSolicitacao.PENDENTE);
@@ -80,18 +79,55 @@ public class SolicitacaoService {
 
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> buscarPorVeterinarioId(Long veterinarioId, Pageable pageable) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
+        Veterinario veterinario = veterinarioRepository.findById(veterinarioId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Veterinário não encontrado com ID: " + veterinarioId
+                ));
+
+        if (!veterinario.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode acessar solicitações de outro veterinário"
+            );
+        }
+
         return solicitacaoRepository.findByVeterinarioId(veterinarioId, pageable)
                 .map(SolicitacaoResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> buscarPorPetId(Long petId, Pageable pageable) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Pet não encontrado com ID: " + petId
+                ));
+
+        if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode acessar solicitações de outro pet"
+            );
+        }
+
         return solicitacaoRepository.findByPetId(petId, pageable)
                 .map(SolicitacaoResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
+        if (!userId.equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode acessar solicitações de outro usuário"
+            );
+        }
+
         return solicitacaoRepository.findByUserId(userId, pageable)
                 .map(SolicitacaoResponseDTO::fromEntity);
     }
@@ -100,6 +136,14 @@ public class SolicitacaoService {
     public SolicitacaoResponseDTO aceitar(Long id) {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
+
+        User usuarioLogado = getUsuarioAutenticado();
+
+        if (!solicitacao.getVeterinario().getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode responder a uma solicitação destinada a outro veterinário"
+            );
+        }
 
         if (solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
             throw new RecursoNaoEncontradoException("A solicitação já foi respondida");
@@ -127,6 +171,14 @@ public class SolicitacaoService {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
 
+        User usuarioLogado = getUsuarioAutenticado();
+
+        if (!solicitacao.getVeterinario().getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode responder a uma solicitação destinada a outro veterinário"
+            );
+        }
+
         if (solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
             throw new RecursoNaoEncontradoException("A solicitação já foi respondida");
         }
@@ -144,11 +196,28 @@ public class SolicitacaoService {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
 
+        User usuarioLogado = getUsuarioAutenticado();
+
+        if (!solicitacao.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode excluir a solicitação de outro usuário"
+            );
+        }
+
         if (solicitacao.getStatus() == StatusSolicitacao.ACEITO) {
             throw new RecursoNaoEncontradoException("Não é possível excluir uma solicitação que já foi aceita");
         }
 
         solicitacaoRepository.delete(solicitacao);
+    }
+
+    // Usuário autenticado pelo JWT
+    private User getUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
 }

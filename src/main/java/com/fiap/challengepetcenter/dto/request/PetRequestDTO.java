@@ -1,20 +1,12 @@
-package com.fiap.challengepetcenter.DTO;
+package com.fiap.challengepetcenter.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
 public record PetRequestDTO(
-
-        @Schema(
-                description = "ID do tutor responsável pelo pet",
-                example = "1"
-        )
-        @NotNull(message = "O tutor é obrigatório")
-        Long userId,
 
         @Schema(
                 description = "Nome do pet",

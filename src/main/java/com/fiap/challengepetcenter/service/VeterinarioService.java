@@ -1,7 +1,7 @@
 package com.fiap.challengepetcenter.service;
 
-import com.fiap.challengepetcenter.DTO.VeterinarioRequestDTO;
-import com.fiap.challengepetcenter.DTO.VeterinarioResponseDTO;
+import com.fiap.challengepetcenter.dto.request.VeterinarioRequestDTO;
+import com.fiap.challengepetcenter.dto.response.VeterinarioResponseDTO;
 import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
 import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.TipoUsuario;
@@ -13,6 +13,8 @@ import com.fiap.challengepetcenter.repository.VeterinarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +41,7 @@ public class VeterinarioService {
         if (user.getTipoUsuario() != TipoUsuario.VETERINARIO) {
             throw new RecursoNaoEncontradoException("O usuário informado não possui perfil de veterinário");
         }
-        
+
         Veterinario veterinario = new Veterinario();
         veterinario.setUser(user);
         veterinario.setCrmv(requestDTO.crmv());
@@ -66,19 +68,33 @@ public class VeterinarioService {
 
     @Transactional(readOnly = true)
     public Page<VeterinarioResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
+        if (!userId.equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException("Você não pode acessar os dados de outro usuário");
+        }
+
         return veterinarioRepository.findByUserId(userId, pageable)
                 .map(VeterinarioResponseDTO::fromEntity);
     }
 
     @Transactional
     public VeterinarioResponseDTO atualizar(Long id, VeterinarioRequestDTO requestDTO) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Veterinário não encontrado com ID: " + id
+                ));
 
-        User user = userRepository.findById(requestDTO.userId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + requestDTO.userId()));
+        if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode atualizar o perfil de outro veterinário"
+            );
+        }
 
-        veterinarioExistente.setUser(user);
         veterinarioExistente.setCrmv(requestDTO.crmv());
         veterinarioExistente.setEspecialidade(requestDTO.especialidade());
         veterinarioExistente.setDescricao(requestDTO.descricao());
@@ -90,8 +106,18 @@ public class VeterinarioService {
 
     @Transactional
     public void deletar(Long id) {
-        if (!veterinarioRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id);
+
+        User usuarioLogado = getUsuarioAutenticado();
+
+        Veterinario veterinarioExistente = veterinarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Veterinário não encontrado com ID: " + id
+                ));
+
+        if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException(
+                    "Você não pode excluir o perfil de outro veterinário"
+            );
         }
 
         if (petVeterinarioRepository.existsByVeterinario_IdAndAtivo(id, true)) {
@@ -99,6 +125,15 @@ public class VeterinarioService {
         }
 
         veterinarioRepository.deleteById(id);
+    }
+
+    // Usuário autenticado pelo JWT
+    private User getUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
 }

@@ -1,7 +1,6 @@
-package com.fiap.challengepetcenter.DTO;
+package com.fiap.challengepetcenter.dto.response;
 
 import com.fiap.challengepetcenter.model.PetVeterinario;
-import com.fiap.challengepetcenter.model.StatusSolicitacao;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;

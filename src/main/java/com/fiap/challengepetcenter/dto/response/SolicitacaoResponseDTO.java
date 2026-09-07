@@ -1,4 +1,4 @@
-package com.fiap.challengepetcenter.DTO;
+package com.fiap.challengepetcenter.dto.response;
 
 import com.fiap.challengepetcenter.model.Solicitacao;
 import com.fiap.challengepetcenter.model.StatusSolicitacao;

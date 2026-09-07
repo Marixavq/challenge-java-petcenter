@@ -1,7 +1,7 @@
 package com.fiap.challengepetcenter.controller;
 
-import com.fiap.challengepetcenter.DTO.DiarioEntradaRequestDTO;
-import com.fiap.challengepetcenter.DTO.DiarioEntradaResponseDTO;
+import com.fiap.challengepetcenter.dto.request.DiarioEntradaRequestDTO;
+import com.fiap.challengepetcenter.dto.response.DiarioEntradaResponseDTO;
 import com.fiap.challengepetcenter.service.DiarioEntradaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

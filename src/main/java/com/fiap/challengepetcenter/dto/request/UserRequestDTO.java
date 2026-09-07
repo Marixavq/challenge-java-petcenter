@@ -1,4 +1,4 @@
-package com.fiap.challengepetcenter.DTO;
+package com.fiap.challengepetcenter.dto.request;
 
 import com.fiap.challengepetcenter.model.TipoUsuario;
 import io.swagger.v3.oas.annotations.media.Schema;

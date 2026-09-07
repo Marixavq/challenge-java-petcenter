@@ -1,7 +1,7 @@
 package com.fiap.challengepetcenter.service;
 
-import com.fiap.challengepetcenter.DTO.LoginRequestDTO;
-import com.fiap.challengepetcenter.DTO.LoginResponseDTO;
+import com.fiap.challengepetcenter.dto.request.LoginRequestDTO;
+import com.fiap.challengepetcenter.dto.response.LoginResponseDTO;
 import com.fiap.challengepetcenter.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

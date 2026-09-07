@@ -1,10 +1,7 @@
 package com.fiap.challengepetcenter.controller;
 
-import com.fiap.challengepetcenter.DTO.PetRequestDTO;
-import com.fiap.challengepetcenter.DTO.PetResponseDTO;
-import com.fiap.challengepetcenter.DTO.VeterinarioRequestDTO;
-import com.fiap.challengepetcenter.DTO.VeterinarioResponseDTO;
-import com.fiap.challengepetcenter.service.PetService;
+import com.fiap.challengepetcenter.dto.request.VeterinarioRequestDTO;
+import com.fiap.challengepetcenter.dto.response.VeterinarioResponseDTO;
 import com.fiap.challengepetcenter.service.VeterinarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

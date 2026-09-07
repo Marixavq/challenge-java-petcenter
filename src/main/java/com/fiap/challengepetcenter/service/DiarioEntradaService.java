@@ -1,7 +1,7 @@
 package com.fiap.challengepetcenter.service;
 
-import com.fiap.challengepetcenter.DTO.DiarioEntradaRequestDTO;
-import com.fiap.challengepetcenter.DTO.DiarioEntradaResponseDTO;
+import com.fiap.challengepetcenter.dto.request.DiarioEntradaRequestDTO;
+import com.fiap.challengepetcenter.dto.response.DiarioEntradaResponseDTO;
 import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.RegistroComDependenciasException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;

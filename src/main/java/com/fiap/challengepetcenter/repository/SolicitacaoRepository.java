@@ -24,8 +24,8 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
             Pageable pageable
     );
 
-    Page<Solicitacao> findByUserId(
-            Long userId,
+    Page<Solicitacao> findByTutorId(
+            Long tutorId,
             Pageable pageable
     );
 }

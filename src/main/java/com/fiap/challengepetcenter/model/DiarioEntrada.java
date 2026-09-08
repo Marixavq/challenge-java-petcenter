@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "diario_entrada")
+@Table(name = "diario_entradas")
 @Schema(
         name = "DiarioEntrada",
         description = "Representa uma entrada de diário associada a um pet no sistema API PetCenter"
@@ -27,53 +27,24 @@ public class DiarioEntrada {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
-    @NotNull(message = "O pet é obrigatório")
-    @Schema(
-            description = "Pet associado à entrada do diário",
-            accessMode = Schema.AccessMode.READ_ONLY
-    )
     private Pet pet;
 
-    @NotNull(message = "A data é obrigatória")
-    @Schema(
-            description = "Data referente à entrada do diário",
-            example = "2026-05-17"
-    )
+    @Column(nullable = false)
     private LocalDate data;
 
-    @Column(updatable = false)
-    @Schema(
-            description = "Data e hora de criação da entrada",
-            example = "2026-05-17T14:30:00",
-            accessMode = Schema.AccessMode.READ_ONLY
-    )
+    @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
 
-    @Schema(
-            description = "Data e hora da última atualização da entrada",
-            example = "2026-05-17T18:00:00",
-            accessMode = Schema.AccessMode.READ_ONLY
-    )
+    @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
 
-    @Schema(
-            description = "Resumo geral do dia do pet",
-            example = "Pet se alimentou bem e apresentou comportamento tranquilo"
-    )
+    @Column(length = 1000)
     private String resumo;
 
-    @Schema(
-            description = "Humor geral observado no pet",
-            example = "Calmo"
-    )
+    @Column(name = "humor_geral", length = 50)
     private String humorGeral;
 
-    @Column(nullable = false)
-    @NotBlank(message = "O status é obrigatório")
-    @Schema(
-            description = "Status atual da entrada do diário",
-            example = "Concluído"
-    )
+    @Column(length = 20)
     private String status;
 
     public DiarioEntrada() {

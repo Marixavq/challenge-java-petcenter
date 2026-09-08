@@ -41,7 +41,6 @@ public record DiarioEntradaRequestDTO(
                 description = "Status atual da entrada do diário",
                 example = "Concluído"
         )
-        @NotBlank(message = "O status é obrigatório")
         @Size(max = 20, message = "O status deve ter no máximo 20 caracteres")
         String status
 

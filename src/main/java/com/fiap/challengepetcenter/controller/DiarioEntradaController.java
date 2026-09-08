@@ -23,7 +23,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/diarioentradas")
-@Tag(name = "DiarioEntradas", description = "Endpoints para gerenciamento das entradas no diário")
+@Tag(name = "DiárioEntradas", description = "Endpoints para gerenciamento das entradas no diário")
 public class DiarioEntradaController {
 
     @Autowired

@@ -29,7 +29,6 @@ public record VeterinarioRequestDTO(
         )
         String especialidade,
 
-        @NotBlank(message = "Descrição é obrigatória")
         @Size(min = 10, max = 500, message = "A descrição deve ter entre 10 e 500 caracteres")
         @Schema(
                 description = "Descrição profissional do veterinário",

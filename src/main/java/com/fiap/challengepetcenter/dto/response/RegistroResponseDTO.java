@@ -2,6 +2,7 @@ package com.fiap.challengepetcenter.dto.response;
 
 import com.fiap.challengepetcenter.model.Registro;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record RegistroResponseDTO(
@@ -10,7 +11,7 @@ public record RegistroResponseDTO(
         Long idDiarioEntrada,
         String tipo,
         String subtipo,
-        Double valor,
+        BigDecimal valor,
         String unidade,
         String nota,
         LocalDateTime horario,

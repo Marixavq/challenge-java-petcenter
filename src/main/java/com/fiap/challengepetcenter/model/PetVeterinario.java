@@ -2,8 +2,6 @@ package com.fiap.challengepetcenter.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
@@ -23,50 +21,21 @@ public class PetVeterinario {
     )
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
-    @NotNull(message = "Pet é obrigatório")
-    @Schema(
-            description = "Pet associado ao veterinário",
-            required = true
-    )
     private Pet pet;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "veterinario_id", nullable = false)
-    @NotNull(message = "Veterinário é obrigatório")
-    @Schema(
-            description = "Veterinário associado ao pet",
-            required = true
-    )
     private Veterinario veterinario;
 
-    @NotNull(message = "Data de início é obrigatória")
-    @Column(name = "data_inicio", nullable = false)
-    @Schema(
-            description = "Data em que o vínculo entre o pet e o veterinário foi iniciado",
-            example = "2026-09-05",
-            required = true
-    )
+    @Column(name = "data_inicio")
     private LocalDate dataInicio;
 
-    @NotNull(message = "Status do vínculo é obrigatório")
-    @Column(nullable = false)
-    @Schema(
-            description = "Indica se o vínculo entre o pet e o veterinário está ativo",
-            example = "true",
-            defaultValue = "true",
-            required = true
-    )
+    @Column
     private Boolean ativo = true;
 
-    @Size(max = 500, message = "As observações devem ter no máximo 500 caracteres")
     @Column(length = 500)
-    @Schema(
-            description = "Observações sobre o vínculo entre o pet e o veterinário",
-            example = "Veterinário responsável pelo acompanhamento clínico do pet.",
-            maxLength = 500
-    )
     private String observacoes;
 
     public PetVeterinario() {

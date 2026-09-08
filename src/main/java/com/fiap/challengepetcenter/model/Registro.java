@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,49 +27,26 @@ public class Registro {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entrada_id", nullable = false)
-    @NotNull(message = "O ID da entrada é obrigatório")
-    @Schema(
-            description = "ID do diário de entrada associado ao registro",
-            accessMode = Schema.AccessMode.READ_ONLY
-    )
     private DiarioEntrada entrada;
 
-    @NotBlank(message = "O tipo é obrigatório")
-    @Schema(
-            description = "Tipo do registro",
-            example = "Alimentação"
-    )
+    @Column(nullable = false, length = 50)
     private String tipo;
 
-    @Schema(
-            description = "Subtipo do registro",
-            example = "Ração seca"
-    )
+    @Column(length = 50)
     private String subtipo;
 
-    @Schema(
-            description = "Valor numérico relacionado ao registro",
-            example = "250.0"
-    )
-    private Double valor;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal valor;
 
-    @Schema(
-            description = "Unidade de medida do valor",
-            example = "gramas"
-    )
+    @Column(length = 20)
     private String unidade;
 
-    @Schema(
-            description = "Observações adicionais do registro",
-            example = "Pet comeu normalmente"
-    )
+    @Column(length = 500)
     private String nota;
-    @Schema(
-            description = "Data e hora do registro",
-            example = "2026-05-17T14:30:00"
-    )
+
     private LocalDateTime horario;
 
+    @Column(name = "atualizado_em")
     @Schema(
             description = "Data e hora da última atualização do registro",
             accessMode = Schema.AccessMode.READ_ONLY
@@ -78,7 +56,7 @@ public class Registro {
     public Registro() {
     }
 
-    public Registro(DiarioEntrada entrada, Long id, String tipo, String subtipo, Double valor, String unidade, String nota) {
+    public Registro(DiarioEntrada entrada, Long id, String tipo, String subtipo, BigDecimal valor, String unidade, String nota) {
         this.entrada = entrada;
         this.id = id;
         this.tipo = tipo;
@@ -122,11 +100,11 @@ public class Registro {
         this.subtipo = subtipo;
     }
 
-    public Double getValor() {
+    public BigDecimal getValor() {
         return valor;
     }
 
-    public void setValor(Double valor) {
+    public void setValor(BigDecimal valor) {
         this.valor = valor;
     }
 

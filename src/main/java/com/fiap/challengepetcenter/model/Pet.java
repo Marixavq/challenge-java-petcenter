@@ -2,7 +2,6 @@ package com.fiap.challengepetcenter.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
@@ -24,7 +23,6 @@ public class Pet {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @NotNull(message = "O tutorId é obrigatório")
     @Schema(
             description = "Tutor responsável pelo pet",
             accessMode = Schema.AccessMode.READ_ONLY
@@ -32,37 +30,17 @@ public class Pet {
     private User user;
 
     @Column(nullable = false, length = 100)
-    @Schema(
-            description = "Nome do pet",
-            example = "Luna"
-    )
     private String nome;
 
     @Column(nullable = false, length = 50)
-    @Schema(
-            description = "Espécie do pet",
-            example = "Cachorro"
-    )
     private String especie;
 
     @Column(length = 100)
-    @Schema(
-            description = "Raça do pet",
-            example = "Golden Retriever"
-    )
     private String raca;
-    
-    @Schema(
-            description = "Data de nascimento do pet",
-            example = "2022-03-15"
-    )
+
     private LocalDate dataNascimento;
 
     @Column(length = 500)
-    @Schema(
-            description = "Observações adicionais sobre o pet",
-            example = "Pet alérgico a determinados alimentos"
-    )
     private String observacoes;
 
     public Pet() {

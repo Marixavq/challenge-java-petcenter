@@ -2,10 +2,6 @@ package com.fiap.challengepetcenter.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
@@ -26,79 +22,29 @@ public class User {
     )
     private Long id;
 
-    @NotBlank(message = "Nome é obrigatório")
-    @Size(min = 3, max = 100, message = "O nome deve ter entre 3 e 100 caracteres")
     @Column(nullable = false, length = 100)
-    @Schema(
-            description = "Nome do usuário",
-            example = "João Silva",
-            required = true,
-            minLength = 3,
-            maxLength = 100
-    )
     private String nome;
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email(message = "Email inválido")
-    @Size(min = 3, max = 150, message = "O email deve ter entre 3 e 150 caracteres")
     @Column(unique = true, nullable = false, length = 150)
-    @Schema(
-            description = "Email único do usuário",
-            example = "joaosilva@email.com",
-            required = true,
-            minLength = 3,
-            maxLength = 120
-    )
     private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
     @Column(nullable = false, length = 255)
-    @Schema(
-            description = "Senha do usuário",
-            example = "123642",
-            required = true
-    )
     private String senha;
 
-    @Column(nullable = false, length = 20)
-    @Schema(
-            description = "Telefone do usuário",
-            example = "11 94002-8922",
-            required = true,
-            maxLength = 20
-    )
+    @Column(length = 20)
     private String telefone;
 
-    @NotNull(message = "Tipo de usuário é obrigatório")
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false, length = 20)
-    @Schema(
-            description = "Tipo do usuário",
-            example = "TUTOR",
-            required = true
-    )
     private TipoUsuario tipoUsuario;
 
-    @Schema(
-            description = "Indica se o usuário está ativo",
-            example = "true",
-            defaultValue = "true"
-    )
+    @Column(name = "ativo")
     private Boolean ativo = true;
 
     @Column(name = "ultimo_login")
-    @Schema(
-            description = "Data e hora do último login",
-            accessMode = Schema.AccessMode.READ_ONLY
-    )
     private LocalDateTime ultimoLogin;
 
     @Column(name = "data_criacao", updatable = false)
-    @Schema(
-            description = "Data e hora da criação do usuário",
-            example = "2026-01-10T10:30:00",
-            accessMode = Schema.AccessMode.READ_ONLY
-    )
     private LocalDateTime dataCriacao;
 
     public User() {

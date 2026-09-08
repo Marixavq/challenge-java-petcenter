@@ -52,7 +52,7 @@ public class SolicitacaoService {
 
         Solicitacao solicitacao = new Solicitacao();
         solicitacao.setPet(pet);
-        solicitacao.setUser(usuarioLogado);
+        solicitacao.setTutor(usuarioLogado);
         solicitacao.setVeterinario(veterinario);
         solicitacao.setMensagem(requestDTO.mensagem());
         solicitacao.setStatus(StatusSolicitacao.PENDENTE);
@@ -118,17 +118,17 @@ public class SolicitacaoService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SolicitacaoResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
+    public Page<SolicitacaoResponseDTO> buscarPorTutorId(Long tutorId, Pageable pageable) {
 
         User usuarioLogado = getUsuarioAutenticado();
 
-        if (!userId.equals(usuarioLogado.getId())) {
+        if (!tutorId.equals(usuarioLogado.getId())) {
             throw new RecursoNaoEncontradoException(
                     "Você não pode acessar solicitações de outro usuário"
             );
         }
 
-        return solicitacaoRepository.findByUserId(userId, pageable)
+        return solicitacaoRepository.findByTutorId(tutorId, pageable)
                 .map(SolicitacaoResponseDTO::fromEntity);
     }
 
@@ -149,7 +149,7 @@ public class SolicitacaoService {
             throw new RecursoNaoEncontradoException("A solicitação já foi respondida");
         }
 
-        solicitacao.setStatus(StatusSolicitacao.ACEITO);
+        solicitacao.setStatus(StatusSolicitacao.ACEITA);
         solicitacao.setRespondidoEm(LocalDateTime.now());
 
         PetVeterinario petVeterinario = new PetVeterinario();
@@ -183,7 +183,7 @@ public class SolicitacaoService {
             throw new RecursoNaoEncontradoException("A solicitação já foi respondida");
         }
 
-        solicitacao.setStatus(StatusSolicitacao.RECUSADO);
+        solicitacao.setStatus(StatusSolicitacao.RECUSADA);
         solicitacao.setRespondidoEm(LocalDateTime.now());
 
         Solicitacao solicitacaoSalva = solicitacaoRepository.save(solicitacao);
@@ -198,13 +198,13 @@ public class SolicitacaoService {
 
         User usuarioLogado = getUsuarioAutenticado();
 
-        if (!solicitacao.getUser().getId().equals(usuarioLogado.getId())) {
+        if (!solicitacao.getTutor().getId().equals(usuarioLogado.getId())) {
             throw new RecursoNaoEncontradoException(
                     "Você não pode excluir a solicitação de outro usuário"
             );
         }
 
-        if (solicitacao.getStatus() == StatusSolicitacao.ACEITO) {
+        if (solicitacao.getStatus() == StatusSolicitacao.ACEITA) {
             throw new RecursoNaoEncontradoException("Não é possível excluir uma solicitação que já foi aceita");
         }
 

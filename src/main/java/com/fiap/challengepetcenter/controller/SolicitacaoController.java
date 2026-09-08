@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/solicitacoes")
-@Tag(name = "Solicitacoes", description = "Endpoints para gerenciamento de solicitações")
+@Tag(name = "Solicitações", description = "Endpoints para gerenciamento de solicitações")
 public class SolicitacaoController {
 
     @Autowired
@@ -163,8 +163,8 @@ public class SolicitacaoController {
                     description = "Usuário não encontrado"
             )
     })
-    public ResponseEntity<Page<SolicitacaoResponseDTO>> buscarPorUserId(
-            @PathVariable Long userId,
+    public ResponseEntity<Page<SolicitacaoResponseDTO>> buscarPorTutorId(
+            @PathVariable Long tutorId,
 
             @PageableDefault(
                     size = 10,
@@ -172,7 +172,7 @@ public class SolicitacaoController {
                     direction = Sort.Direction.ASC
             ) Pageable pageable
     ) {
-        Page<SolicitacaoResponseDTO> solicitacoes = solicitacaoService.buscarPorUserId(userId, pageable);
+        Page<SolicitacaoResponseDTO> solicitacoes = solicitacaoService.buscarPorTutorId(tutorId, pageable);
         return ResponseEntity.ok(solicitacoes);
     }
 

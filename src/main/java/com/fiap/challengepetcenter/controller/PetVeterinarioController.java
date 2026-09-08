@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/pet-veterinarios")
-@Tag(name = "Pets", description = "Endpoints para gerenciamento do relacionamento entre pets e veterinários")
+@Tag(name = "PetVeterinários", description = "Endpoints para gerenciamento do relacionamento entre pets e veterinários")
 public class PetVeterinarioController {
 
     @Autowired

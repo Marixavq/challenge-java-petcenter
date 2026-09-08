@@ -31,9 +31,7 @@ public record UserRequestDTO(
                 example = "123456"
         )
         @NotBlank(message = "Senha obrigatória")
-        @Size(min = 6, max = 8, message = "Senha deve ter entre 6 e 8 caracteres")
-        String senha,
-
+        @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres") String senha,
         @Schema(
                 description = "Telefone do usuário",
                 example = "11 94002-8922"

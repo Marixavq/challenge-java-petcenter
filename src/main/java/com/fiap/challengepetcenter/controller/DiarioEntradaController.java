@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -30,6 +31,7 @@ public class DiarioEntradaController {
     private DiarioEntradaService diarioEntradaService;
 
     @PostMapping
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Criar entrada no diário",
             description = "Cria uma nova entrada no diário associada a um pet."
@@ -48,6 +50,7 @@ public class DiarioEntradaController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Listar todas as entradas no diário",
             description = "Retorna uma lista  completa de todas as entradas cadastradas."
@@ -71,6 +74,7 @@ public class DiarioEntradaController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar entrada por ID",
             description = "Retorna uma entrada específica baseada no ID."
@@ -87,8 +91,9 @@ public class DiarioEntradaController {
         return ResponseEntity.ok(diarioEntradaService.buscarPorId(id));
     }
 
-    // GET http://localhost:8080/api/diarioentradas/data?data=2026-05-11
-    @GetMapping("/data")
+    // GET /api/diarioentradas/data/2026-05-11
+    @GetMapping("/data/{data}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar entradas por data",
             description = "Retorna todas as entradas cadastradas em uma data específica."
@@ -98,8 +103,7 @@ public class DiarioEntradaController {
             description = "Entradas encontradas com sucesso"
     )
     public ResponseEntity<Page<DiarioEntradaResponseDTO>> buscarPorData(
-            @RequestParam LocalDate data,
-
+            @PathVariable LocalDate data,
             @PageableDefault(
                     size = 10,
                     sort = "id",
@@ -112,6 +116,7 @@ public class DiarioEntradaController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Atualizar entrada do diário",
             description = "Atualiza uma entrada existente baseada no ID."
@@ -136,6 +141,7 @@ public class DiarioEntradaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Deletar entrada do diário",
             description = "Remove uma entrada do diário baseada no ID."

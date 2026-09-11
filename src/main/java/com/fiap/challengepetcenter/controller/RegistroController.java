@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,6 +29,7 @@ public class RegistroController {
     private RegistroService registroService;
 
     @PostMapping
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Criar registro",
             description = "Cria um novo registro associado a uma entrada do diário."
@@ -48,6 +50,7 @@ public class RegistroController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Listar registros",
             description = "Retorna uma lista completa de todos os registros cadastrados."
@@ -72,6 +75,7 @@ public class RegistroController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar registro por ID",
             description = "Retorna um registro específico baseado no ID."
@@ -91,6 +95,7 @@ public class RegistroController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Atualizar registro",
             description = "Atualiza os dados de um registro existente."
@@ -115,6 +120,7 @@ public class RegistroController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Deletar registro",
             description = "Remove um registro do sistema baseado no ID."

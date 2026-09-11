@@ -69,6 +69,47 @@ public class AlertaService {
                 .map(AlertaResponseDTO::fromEntity);
     }
 
+    @Transactional(readOnly = true)
+    public AlertaResponseDTO buscarPorId(Long id) {
+        Alerta alerta = alertaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Alerta não encontrado"));
+
+        return AlertaResponseDTO.fromEntity(alerta);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AlertaResponseDTO> listarPorPet(Long petId, Pageable pageable) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+
+        return alertaRepository.findByPetId(pet.getId(), pageable)
+                .map(AlertaResponseDTO::fromEntity);
+    }
+
+    @Transactional
+    public AlertaResponseDTO desativar(Long id) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
+        Alerta alerta = alertaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Alerta não encontrado"));
+
+        boolean ehTutorDoPet = alerta.getPet().getUser().getId()
+                .equals(usuarioLogado.getId());
+
+        boolean ehVeterinarioDoAlerta = alerta.getVeterinario().getUser().getId()
+                .equals(usuarioLogado.getId());
+
+        if (!ehTutorDoPet && !ehVeterinarioDoAlerta) {
+            throw new RuntimeException(
+                    "Você não tem permissão para desativar este alerta"
+            );
+        }
+
+        alerta.setAtivo(false);
+
+        return AlertaResponseDTO.fromEntity(alertaRepository.save(alerta));
+    }
 
     // Usuário autenticado pelo JWT
     private User getUsuarioAutenticado() {

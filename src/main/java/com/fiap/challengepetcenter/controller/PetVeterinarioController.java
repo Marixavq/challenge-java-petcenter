@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +28,7 @@ public class PetVeterinarioController {
 
 
     @GetMapping
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Listar relacionamento entre pets e veterinários",
             description = "Retorna uma lista completa de todos os relacionamento entre pets e veterinários cadastrados."
@@ -50,6 +52,7 @@ public class PetVeterinarioController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar relacionamento entre pet e veterinário por ID",
             description = "Retorna um relacionamento entre pet e veterinário específico baseado no ID."
@@ -70,6 +73,7 @@ public class PetVeterinarioController {
 
 
     @GetMapping("/veterinario/{veterinarioId}")
+    @PreAuthorize("hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar relacionamento entre pets e veterinários por veterinário",
             description = "Retorna todos os relacionamento entre pets e veterinários associados a um veterinário específico."
@@ -86,7 +90,6 @@ public class PetVeterinarioController {
     })
     public ResponseEntity<Page<PetVeterinarioResponseDTO>> buscarPorVeterinario(
             @PathVariable Long veterinarioId,
-
             @PageableDefault(
                     size = 10,
                     sort = "id",
@@ -98,6 +101,7 @@ public class PetVeterinarioController {
     }
 
     @GetMapping("/pet/{petId}")
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Buscar relacionamento entre pets e veterinários por pet",
             description = "Retorna todos os relacionamento entre pets e veterinários associados a um pet específico."
@@ -114,7 +118,6 @@ public class PetVeterinarioController {
     })
     public ResponseEntity<Page<PetVeterinarioResponseDTO>> buscarPorPet(
             @PathVariable Long petId,
-
             @PageableDefault(
                     size = 10,
                     sort = "id",
@@ -126,6 +129,7 @@ public class PetVeterinarioController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('VETERINARIO')")
     @Operation(
             summary = "Deletar pet",
             description = "Remove um relacionamento entre pet e veterinário do sistema baseado no ID."

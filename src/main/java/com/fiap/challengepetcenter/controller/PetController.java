@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,9 +29,10 @@ public class PetController {
     private PetService petService;
 
     @PostMapping
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Criar pet",
-            description = "Cria um novo pet associado a um usuário."
+            description = "Cria um novo pet associado ao usuário autenticado."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -42,20 +44,31 @@ public class PetController {
                     description = "Dados inválidos"
             )
     })
-    public ResponseEntity<PetResponseDTO> criar(@Valid @RequestBody PetRequestDTO requestDTO) {
+    public ResponseEntity<PetResponseDTO> criar(
+            @Valid @RequestBody PetRequestDTO requestDTO) {
+
         PetResponseDTO novoPet = petService.salvar(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoPet);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(novoPet);
     }
 
+
     @GetMapping
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Listar pets",
-            description = "Retorna uma lista completa de todos os pets cadastrados."
+            description = "Retorna uma lista de pets cadastrados."
     )
     @ApiResponse(
             responseCode = "200",
             description = "Lista de pets retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PetResponseDTO.class)
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            implementation = PetResponseDTO.class
+                    )
             )
     )
     public ResponseEntity<Page<PetResponseDTO>> listarTodos(
@@ -64,13 +77,17 @@ public class PetController {
                     size = 10,
                     sort = "id",
                     direction = Sort.Direction.ASC
-            ) Pageable pageable
-    ) {
-        Page<PetResponseDTO> pets = petService.listarTodos(pageable);
+            ) Pageable pageable) {
+
+        Page<PetResponseDTO> pets =
+                petService.listarTodos(pageable);
+
         return ResponseEntity.ok(pets);
     }
 
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar pet por ID",
             description = "Retorna um pet específico baseado no ID."
@@ -85,14 +102,20 @@ public class PetController {
                     description = "Pet não encontrado"
             )
     })
-    public ResponseEntity<PetResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(petService.buscarPorId(id));
+    public ResponseEntity<PetResponseDTO> buscarPorId(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                petService.buscarPorId(id)
+        );
     }
 
+
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar pets por usuário",
-            description = "Retorna todos os pets associados a um usuário específico."
+            description = "Retorna os pets associados a um usuário específico."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -106,18 +129,21 @@ public class PetController {
     })
     public ResponseEntity<Page<PetResponseDTO>> buscarPorUserId(
             @PathVariable Long userId,
-
             @PageableDefault(
                     size = 10,
                     sort = "id",
                     direction = Sort.Direction.ASC
-            ) Pageable pageable
-    ) {
-        Page<PetResponseDTO> pets = petService.buscarPorUserId(userId, pageable);
+            ) Pageable pageable) {
+
+        Page<PetResponseDTO> pets =
+                petService.buscarPorUserId(userId, pageable);
+
         return ResponseEntity.ok(pets);
     }
 
+
     @GetMapping("/nome/{nome}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Buscar pets por nome",
             description = "Retorna todos os pets com o nome informado."
@@ -128,21 +154,23 @@ public class PetController {
                     description = "Pets encontrados com sucesso"
             )
     })
-
     public ResponseEntity<Page<PetResponseDTO>> buscarPorNome(
             @PathVariable String nome,
-
             @PageableDefault(
                     size = 10,
                     sort = "id",
                     direction = Sort.Direction.ASC
-            ) Pageable pageable
-    ) {
-        Page<PetResponseDTO> pets = petService.buscarPorNome(nome, pageable);
+            ) Pageable pageable) {
+
+        Page<PetResponseDTO> pets =
+                petService.buscarPorNome(nome, pageable);
+
         return ResponseEntity.ok(pets);
     }
 
+
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Atualizar pet",
             description = "Atualiza os dados de um pet existente."
@@ -161,12 +189,19 @@ public class PetController {
                     description = "Dados inválidos"
             )
     })
-    public ResponseEntity<PetResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody PetRequestDTO requestDTO) {
-        PetResponseDTO petAtualizado = petService.atualizar(id, requestDTO);
+    public ResponseEntity<PetResponseDTO> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody PetRequestDTO requestDTO) {
+
+        PetResponseDTO petAtualizado =
+                petService.atualizar(id, requestDTO);
+
         return ResponseEntity.ok(petAtualizado);
     }
 
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR')")
     @Operation(
             summary = "Deletar pet",
             description = "Remove um pet do sistema baseado no ID."
@@ -181,8 +216,11 @@ public class PetController {
                     description = "Pet não encontrado"
             )
     })
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(
+            @PathVariable Long id) {
+
         petService.deletar(id);
+
         return ResponseEntity.noContent().build();
     }
 }

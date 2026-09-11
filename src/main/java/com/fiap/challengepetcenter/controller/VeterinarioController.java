@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,6 +29,7 @@ public class VeterinarioController {
     private VeterinarioService veterinarioService;
 
     @PostMapping
+    @PreAuthorize("hasRole('VETERINARIO')")
     @Operation(
             summary = "Criar veterinário",
             description = "Cria um novo veterinário associado a um usuário."
@@ -48,6 +50,7 @@ public class VeterinarioController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Listar veterinarios",
             description = "Retorna uma lista completa de todos os veterinários cadastrados."
@@ -72,95 +75,113 @@ public class VeterinarioController {
 
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
-            summary = "Buscar veterinario por ID",
-            description = "Retorna um veterinario específico baseado no ID."
+            summary = "Buscar veterinário por ID",
+            description = "Retorna um veterinário específico baseado no ID."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Veterinario encontrado com sucesso"
+                    description = "Veterinário encontrado com sucesso"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Veterinario não encontrado"
+                    description = "Veterinário não encontrado"
             )
     })
-    public ResponseEntity<VeterinarioResponseDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(veterinarioService.buscarPorId(id));
+
+    public ResponseEntity<VeterinarioResponseDTO> buscarPorId(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(
+                veterinarioService.buscarPorId(id)
+        );
     }
 
+
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('VETERINARIO')")
     @Operation(
-            summary = "Buscar pets por usuário",
-            description = "Retorna todos os pets associados a um usuário específico."
+            summary = "Buscar veterinário por usuário",
+            description = "Retorna o veterinário associado a um usuário específico."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Pets encontrados com sucesso"
+                    description = "Veterinário encontrado com sucesso"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Usuário não encontrado"
+                    description = "Usuário ou veterinário não encontrado"
             )
     })
     public ResponseEntity<Page<VeterinarioResponseDTO>> buscarPorUserId(
             @PathVariable Long userId,
-
             @PageableDefault(
                     size = 10,
                     sort = "id",
                     direction = Sort.Direction.ASC
-            ) Pageable pageable
-    ) {
-        Page<VeterinarioResponseDTO> users = veterinarioService.buscarPorUserId(userId, pageable);
-        return ResponseEntity.ok(users);
+            ) Pageable pageable) {
+
+        Page<VeterinarioResponseDTO> veterinarios =
+                veterinarioService.buscarPorUserId(userId, pageable);
+
+        return ResponseEntity.ok(veterinarios);
     }
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('VETERINARIO')")
     @Operation(
-            summary = "Atualizar pet",
-            description = "Atualiza os dados de um pet existente."
+            summary = "Atualizar veterinário",
+            description = "Atualiza os dados de um veterinário existente."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Pet atualizado com sucesso"
+                    description = "Veterinário atualizado com sucesso"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Pet não encontrado"
+                    description = "Veterinário não encontrado"
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
             )
     })
-    public ResponseEntity<VeterinarioResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody VeterinarioRequestDTO requestDTO) {
-        VeterinarioResponseDTO veterinarioAtualizado = veterinarioService.atualizar(id, requestDTO);
+    public ResponseEntity<VeterinarioResponseDTO> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody VeterinarioRequestDTO requestDTO) {
+
+        VeterinarioResponseDTO veterinarioAtualizado =
+                veterinarioService.atualizar(id, requestDTO);
+
         return ResponseEntity.ok(veterinarioAtualizado);
     }
 
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('VETERINARIO')")
     @Operation(
-            summary = "Deletar pet",
-            description = "Remove um pet do sistema baseado no ID."
+            summary = "Deletar veterinário",
+            description = "Remove um veterinário do sistema baseado no ID."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",
-                    description = "Pet removido com sucesso"
+                    description = "Veterinário removido com sucesso"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Pet não encontrado"
+                    description = "Veterinário não encontrado"
             )
     })
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(
+            @PathVariable Long id) {
+
         veterinarioService.deletar(id);
+
         return ResponseEntity.noContent().build();
     }
-
 }

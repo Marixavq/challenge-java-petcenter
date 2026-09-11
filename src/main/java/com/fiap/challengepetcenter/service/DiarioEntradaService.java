@@ -6,12 +6,16 @@ import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.RegistroComDependenciasException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
+import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
+import com.fiap.challengepetcenter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,18 +27,27 @@ public class DiarioEntradaService {
     private final DiarioEntradaRepository diarioEntradaRepository;
     private final PetRepository petRepository;
     private final RegistroRepository registroRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public DiarioEntradaService(DiarioEntradaRepository diarioEntradaRepository, PetRepository petRepository, RegistroRepository registroRepository) {
+    public DiarioEntradaService(DiarioEntradaRepository diarioEntradaRepository, PetRepository petRepository, RegistroRepository registroRepository, UserRepository userRepository) {
         this.diarioEntradaRepository = diarioEntradaRepository;
         this.petRepository = petRepository;
         this.registroRepository = registroRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
     public DiarioEntradaResponseDTO salvar(DiarioEntradaRequestDTO requestDTO) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
+
+        if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException("Você não pode criar uma entrada para o pet de outro usuário");
+        }
 
         DiarioEntrada diarioEntrada = new DiarioEntrada();
         diarioEntrada.setPet(pet);
@@ -73,11 +86,22 @@ public class DiarioEntradaService {
 
     @Transactional
     public DiarioEntradaResponseDTO atualizar(Long id, DiarioEntradaRequestDTO requestDTO) {
+
+        User usuarioLogado = getUsuarioAutenticado();
+
         DiarioEntrada diarioEntradaExistente = diarioEntradaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
 
+        if (!diarioEntradaExistente.getPet().getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException("Você não pode atualizar uma entrada de outro usuário");
+        }
+
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
+
+        if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException("Você não pode associar a entrada ao pet de outro usuário");
+        }
 
         diarioEntradaExistente.setPet(pet);
         diarioEntradaExistente.setData(requestDTO.data());
@@ -93,15 +117,30 @@ public class DiarioEntradaService {
 
     @Transactional
     public void deletar(Long id) {
-        if (!diarioEntradaRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id);
+        User usuarioLogado = getUsuarioAutenticado();
+
+        DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
+
+        if (!diarioEntrada.getPet().getUser().getId().equals(usuarioLogado.getId())) {
+            throw new RecursoNaoEncontradoException("Você não pode excluir uma entrada de outro usuário");
         }
 
-        if (registroRepository.existsById(id)) {
-            throw new RegistroComDependenciasException("Não é possível excluir o DiarioEntrada pois existem registros vinculados a ele");
+        if (registroRepository.existsByEntradaId(id)) {
+            throw new RegistroComDependenciasException("Não é possível excluir o DiarioEntrada pois existem registros vinculados a ele"
+            );
         }
 
         diarioEntradaRepository.deleteById(id);
+    }
+
+    // Usuário autenticado pelo JWT
+    private User getUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 }
 

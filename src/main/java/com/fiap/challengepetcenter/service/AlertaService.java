@@ -26,26 +26,36 @@ public class AlertaService {
     private final UserRepository userRepository;
     private final VeterinarioRepository veterinarioRepository;
 
-
     @Autowired
-    public AlertaService(PetRepository petRepository, AlertaRepository alertaRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository) {
+    public AlertaService(
+            PetRepository petRepository,
+            AlertaRepository alertaRepository,
+            UserRepository userRepository,
+            VeterinarioRepository veterinarioRepository
+    ) {
         this.petRepository = petRepository;
         this.alertaRepository = alertaRepository;
         this.userRepository = userRepository;
         this.veterinarioRepository = veterinarioRepository;
-
     }
 
     @Transactional
     public AlertaResponseDTO salvar(AlertaRequestDTO requestDTO) {
 
         User usuarioLogado = getUsuarioAutenticado();
+
         Veterinario veterinario = veterinarioRepository
                 .findByUserId(usuarioLogado.getId())
-                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Veterinário não encontrado")
+                );
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Pet não encontrado com ID: " + requestDTO.petId()
+                        )
+                );
 
         Alerta alerta = new Alerta();
         alerta.setPet(pet);
@@ -65,24 +75,37 @@ public class AlertaService {
 
     @Transactional(readOnly = true)
     public Page<AlertaResponseDTO> listarTodos(Pageable pageable) {
+
         return alertaRepository.findAll(pageable)
                 .map(AlertaResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public AlertaResponseDTO buscarPorId(Long id) {
+
         Alerta alerta = alertaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Alerta não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Alerta não encontrado com ID: " + id
+                        )
+                );
 
         return AlertaResponseDTO.fromEntity(alerta);
     }
 
     @Transactional(readOnly = true)
-    public Page<AlertaResponseDTO> listarPorPet(Long petId, Pageable pageable) {
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado"));
+    public Page<AlertaResponseDTO> listarPorPet(
+            Long petId,
+            Pageable pageable
+    ) {
 
-        return alertaRepository.findByPetId(pet.getId(), pageable)
+        if (!petRepository.existsById(petId)) {
+            throw new RuntimeException(
+                    "Pet não encontrado com ID: " + petId
+            );
+        }
+
+        return alertaRepository.findByPetId(petId, pageable)
                 .map(AlertaResponseDTO::fromEntity);
     }
 
@@ -92,13 +115,19 @@ public class AlertaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Alerta alerta = alertaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Alerta não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Alerta não encontrado com ID: " + id
+                        )
+                );
 
-        boolean ehTutorDoPet = alerta.getPet().getUser().getId()
-                .equals(usuarioLogado.getId());
+        boolean ehTutorDoPet =
+                alerta.getPet().getUser().getId()
+                        .equals(usuarioLogado.getId());
 
-        boolean ehVeterinarioDoAlerta = alerta.getVeterinario().getUser().getId()
-                .equals(usuarioLogado.getId());
+        boolean ehVeterinarioDoAlerta =
+                alerta.getVeterinario().getUser().getId()
+                        .equals(usuarioLogado.getId());
 
         if (!ehTutorDoPet && !ehVeterinarioDoAlerta) {
             throw new RuntimeException(
@@ -108,16 +137,22 @@ public class AlertaService {
 
         alerta.setAtivo(false);
 
-        return AlertaResponseDTO.fromEntity(alertaRepository.save(alerta));
+        return AlertaResponseDTO.fromEntity(
+                alertaRepository.save(alerta)
+        );
     }
 
     // Usuário autenticado pelo JWT
     private User getUsuarioAutenticado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Usuário não encontrado")
+                );
     }
-
 }

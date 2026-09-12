@@ -42,12 +42,13 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/api-docs/**",
-                                "/h2-console/**"
+                                "/h2-console/**",
+                                "/"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .anyRequest().authenticated()
-               
+
                 )
                 .addFilterBefore(
                         jwtAuthenticationFilter,

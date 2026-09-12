@@ -2,8 +2,6 @@ package com.fiap.challengepetcenter.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,13 +42,14 @@ public class DiarioEntrada {
     @Column(name = "humor_geral", length = 50)
     private String humorGeral;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String status;
+    private StatusDiario status;
 
     public DiarioEntrada() {
     }
 
-    public DiarioEntrada(Long id, Pet pet, LocalDate data, String resumo, String humorGeral, String status) {
+    public DiarioEntrada(Long id, Pet pet, LocalDate data, String resumo, String humorGeral, StatusDiario status) {
         this.id = id;
         this.pet = pet;
         this.data = data;
@@ -59,7 +58,6 @@ public class DiarioEntrada {
         this.resumo = resumo;
         this.humorGeral = humorGeral;
         this.status = status;
-
     }
 
     public Long getId() {
@@ -118,11 +116,11 @@ public class DiarioEntrada {
         this.humorGeral = humorGeral;
     }
 
-    public String getStatus() {
+    public StatusDiario getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusDiario status) {
         this.status = status;
     }
 

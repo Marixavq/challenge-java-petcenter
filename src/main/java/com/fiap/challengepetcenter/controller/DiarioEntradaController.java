@@ -46,7 +46,9 @@ public class DiarioEntradaController {
     })
     public ResponseEntity<DiarioEntradaResponseDTO> criar(@Valid @RequestBody DiarioEntradaRequestDTO requestDTO) {
         DiarioEntradaResponseDTO novoDiarioEntrada = diarioEntradaService.salvar(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoDiarioEntrada);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(novoDiarioEntrada);
     }
 
     @GetMapping

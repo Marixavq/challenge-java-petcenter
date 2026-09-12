@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.dto.response;
 
 import com.fiap.challengepetcenter.model.DiarioEntrada;
+import com.fiap.challengepetcenter.model.StatusDiario;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ public record DiarioEntradaResponseDTO(
         LocalDate data,
         String resumo,
         String humorGeral,
-        String status,
+        StatusDiario status,
 
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm

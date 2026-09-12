@@ -2,8 +2,6 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.PetRequestDTO;
 import com.fiap.challengepetcenter.dto.response.PetResponseDTO;
-import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
@@ -57,38 +55,20 @@ public class PetService {
 
     @Transactional(readOnly = true)
     public PetResponseDTO buscarPorId(Long id) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
         Pet pet = petRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
-
-        if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException("Você não pode acessar um pet de outro usuário");
-        }
-
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
         return PetResponseDTO.fromEntity(pet);
     }
 
     @Transactional(readOnly = true)
     public Page<PetResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        if (!userId.equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException("Você não pode acessar os pets de outro usuário");
-        }
-
         return petRepository.findByUserId(userId, pageable)
                 .map(PetResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public Page<PetResponseDTO> buscarPorNome(String nome, Pageable pageable) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        return petRepository.findByNomeContainingAndUserId(nome, usuarioLogado.getId(), pageable)
+        return petRepository.findByNomeContaining(nome, pageable)
                 .map(PetResponseDTO::fromEntity);
     }
 
@@ -98,10 +78,10 @@ public class PetService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Pet petExistente = petRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
 
         if (!petExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException("Você não pode atualizar um pet de outro usuário");
+            throw new RuntimeException("Você não pode atualizar um pet de outro usuário");
         }
 
         petExistente.setNome(requestDTO.nome());
@@ -121,14 +101,14 @@ public class PetService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Pet petExistente = petRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
 
         if (!petExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException("Você não pode excluir um pet de outro usuário");
+            throw new RuntimeException("Você não pode excluir um pet de outro usuário");
         }
 
         if (diarioEntradaRepository.existsByPetId(id)) {
-            throw new DiarioEntradaComDependenciasException("Não é possível excluir o pet pois existem entradas de diário vinculadas a ele");
+            throw new RuntimeException("Não é possível excluir o pet pois existem entradas de diário vinculadas a ele");
         }
 
         petRepository.deleteById(id);

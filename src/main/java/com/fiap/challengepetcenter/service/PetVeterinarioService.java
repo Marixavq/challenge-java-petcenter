@@ -1,11 +1,8 @@
 package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.response.PetVeterinarioResponseDTO;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
-import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.PetVeterinario;
 import com.fiap.challengepetcenter.model.User;
-import com.fiap.challengepetcenter.model.Veterinario;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
@@ -23,21 +20,15 @@ public class PetVeterinarioService {
 
     private final PetVeterinarioRepository petVeterinarioRepository;
     private final UserRepository userRepository;
-    private final PetRepository petRepository;
-    private final VeterinarioRepository veterinarioRepository;
 
 
     @Autowired
     public PetVeterinarioService(
             PetVeterinarioRepository petVeterinarioRepository,
-            UserRepository userRepository,
-            PetRepository petRepository,
-            VeterinarioRepository veterinarioRepository) {
+            UserRepository userRepository) {
 
         this.petVeterinarioRepository = petVeterinarioRepository;
         this.userRepository = userRepository;
-        this.petRepository = petRepository;
-        this.veterinarioRepository = veterinarioRepository;
     }
 
     @Transactional(readOnly = true)
@@ -48,68 +39,20 @@ public class PetVeterinarioService {
 
     @Transactional(readOnly = true)
     public PetVeterinarioResponseDTO buscarPorId(Long id) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
         PetVeterinario petVeterinario = petVeterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Vínculo entre pet e veterinário não encontrado com ID: " + id
-                ));
-
-        boolean ehDonoDoPet =
-                petVeterinario.getPet().getUser().getId()
-                        .equals(usuarioLogado.getId());
-
-        boolean ehVeterinario =
-                petVeterinario.getVeterinario().getUser().getId()
-                        .equals(usuarioLogado.getId());
-
-        if (!ehDonoDoPet && !ehVeterinario) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode acessar este vínculo"
-            );
-        }
-
+                .orElseThrow(() -> new RuntimeException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
         return PetVeterinarioResponseDTO.fromEntity(petVeterinario);
     }
 
     @Transactional(readOnly = true)
     public Page<PetVeterinarioResponseDTO> buscarPorVeterinarioId(Long veterinarioId, Pageable pageable) {
-
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        Veterinario veterinario = veterinarioRepository.findById(veterinarioId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Veterinário não encontrado com ID: " + veterinarioId
-                ));
-
-        if (!veterinario.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode acessar os vínculos de outro veterinário"
-            );
-        }
-
-        return petVeterinarioRepository.findByVeterinario_Id(veterinarioId, pageable)
+        return petVeterinarioRepository.findByVeterinarioId(veterinarioId, pageable)
                 .map(PetVeterinarioResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public Page<PetVeterinarioResponseDTO> buscarPorPetId(Long petId, Pageable pageable) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Pet não encontrado com ID: " + petId
-                ));
-
-        if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode acessar os vínculos de outro pet"
-            );
-        }
-        return petVeterinarioRepository.findByPet_Id(petId, pageable)
+        return petVeterinarioRepository.findByPetId(petId, pageable)
                 .map(PetVeterinarioResponseDTO::fromEntity);
     }
 
@@ -119,18 +62,13 @@ public class PetVeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         PetVeterinario petVeterinario = petVeterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Vínculo entre pet e veterinário não encontrado com ID: " + id
-                ));
+                .orElseThrow(() -> new RuntimeException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
 
         if (!petVeterinario.getVeterinario().getUser().getId()
                 .equals(usuarioLogado.getId())) {
-
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode excluir o vínculo de outro veterinário"
-            );
+            throw new RuntimeException("Você não pode excluir o vínculo de outro veterinário");
         }
-        
+
         petVeterinarioRepository.deleteById(id);
     }
 
@@ -142,6 +80,5 @@ public class PetVeterinarioService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
-
 
 }

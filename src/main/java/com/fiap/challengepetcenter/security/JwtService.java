@@ -29,7 +29,7 @@ public class JwtService {
                 .signWith(getSigningKey())
                 .compact();
     }
-    
+
     public String extrairUsername(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())

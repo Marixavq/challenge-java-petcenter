@@ -1,5 +1,6 @@
 package com.fiap.challengepetcenter.dto.request;
 
+import com.fiap.challengepetcenter.model.StatusDiario;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -39,10 +40,9 @@ public record DiarioEntradaRequestDTO(
 
         @Schema(
                 description = "Status atual da entrada do diário",
-                example = "Concluído"
+                example = "COMPLETO"
         )
-        @Size(max = 20, message = "O status deve ter no máximo 20 caracteres")
-        String status
+        StatusDiario status
 
 ) {
 }

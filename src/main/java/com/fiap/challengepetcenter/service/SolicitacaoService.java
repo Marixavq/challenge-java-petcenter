@@ -2,7 +2,6 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.SolicitacaoRequestDTO;
 import com.fiap.challengepetcenter.dto.response.SolicitacaoResponseDTO;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.*;
 import com.fiap.challengepetcenter.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,17 +36,15 @@ public class SolicitacaoService {
     @Transactional
     public SolicitacaoResponseDTO salvar(SolicitacaoRequestDTO requestDTO) {
         Veterinario veterinario = veterinarioRepository.findById(requestDTO.veterinarioId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + requestDTO.veterinarioId()));
+                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado com ID: " + requestDTO.veterinarioId()));
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         User usuarioLogado = getUsuarioAutenticado();
 
         if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode criar uma solicitação para o pet de outro usuário"
-            );
+            throw new RuntimeException("Você não pode criar uma solicitação para o pet de outro usuário");
         }
 
         Solicitacao solicitacao = new Solicitacao();
@@ -66,68 +63,30 @@ public class SolicitacaoService {
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> listarTodos(Pageable pageable) {
         Page<Solicitacao> solicitacoes = solicitacaoRepository.findAll(pageable);
-
         return solicitacoes.map(SolicitacaoResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public SolicitacaoResponseDTO buscarPorId(Long id) {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada com ID: " + id));
         return SolicitacaoResponseDTO.fromEntity(solicitacao);
     }
 
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> buscarPorVeterinarioId(Long veterinarioId, Pageable pageable) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        Veterinario veterinario = veterinarioRepository.findById(veterinarioId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Veterinário não encontrado com ID: " + veterinarioId
-                ));
-
-        if (!veterinario.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode acessar solicitações de outro veterinário"
-            );
-        }
-
         return solicitacaoRepository.findByVeterinarioId(veterinarioId, pageable)
                 .map(SolicitacaoResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> buscarPorPetId(Long petId, Pageable pageable) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Pet não encontrado com ID: " + petId
-                ));
-
-        if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode acessar solicitações de outro pet"
-            );
-        }
-
         return solicitacaoRepository.findByPetId(petId, pageable)
                 .map(SolicitacaoResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> buscarPorTutorId(Long tutorId, Pageable pageable) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        if (!tutorId.equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode acessar solicitações de outro usuário"
-            );
-        }
-
         return solicitacaoRepository.findByTutorId(tutorId, pageable)
                 .map(SolicitacaoResponseDTO::fromEntity);
     }
@@ -135,18 +94,16 @@ public class SolicitacaoService {
     @Transactional
     public SolicitacaoResponseDTO aceitar(Long id) {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada com ID: " + id));
 
         User usuarioLogado = getUsuarioAutenticado();
 
         if (!solicitacao.getVeterinario().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode responder a uma solicitação destinada a outro veterinário"
-            );
+            throw new RuntimeException("Você não pode responder a uma solicitação destinada a outro veterinário");
         }
 
         if (solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
-            throw new RecursoNaoEncontradoException("A solicitação já foi respondida");
+            throw new RuntimeException("A solicitação já foi respondida");
         }
 
         solicitacao.setStatus(StatusSolicitacao.ACEITA);
@@ -169,18 +126,16 @@ public class SolicitacaoService {
     @Transactional
     public SolicitacaoResponseDTO recusar(Long id) {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada com ID: " + id));
 
         User usuarioLogado = getUsuarioAutenticado();
 
         if (!solicitacao.getVeterinario().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode responder a uma solicitação destinada a outro veterinário"
-            );
+            throw new RuntimeException("Você não pode responder a uma solicitação destinada a outro veterinário");
         }
 
         if (solicitacao.getStatus() != StatusSolicitacao.PENDENTE) {
-            throw new RecursoNaoEncontradoException("A solicitação já foi respondida");
+            throw new RuntimeException("A solicitação já foi respondida");
         }
 
         solicitacao.setStatus(StatusSolicitacao.RECUSADA);
@@ -194,18 +149,16 @@ public class SolicitacaoService {
     @Transactional
     public void deletar(Long id) {
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada com ID: " + id));
 
         User usuarioLogado = getUsuarioAutenticado();
 
         if (!solicitacao.getTutor().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode excluir a solicitação de outro usuário"
-            );
+            throw new RuntimeException("Você não pode excluir a solicitação de outro usuário");
         }
 
         if (solicitacao.getStatus() == StatusSolicitacao.ACEITA) {
-            throw new RecursoNaoEncontradoException("Não é possível excluir uma solicitação que já foi aceita");
+            throw new RuntimeException("Não é possível excluir uma solicitação que já foi aceita");
         }
 
         solicitacaoRepository.delete(solicitacao);

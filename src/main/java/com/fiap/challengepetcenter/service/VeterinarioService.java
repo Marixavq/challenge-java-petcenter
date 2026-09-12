@@ -2,9 +2,6 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.VeterinarioRequestDTO;
 import com.fiap.challengepetcenter.dto.response.VeterinarioResponseDTO;
-import com.fiap.challengepetcenter.exception.DiarioEntradaComDependenciasException;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
-import com.fiap.challengepetcenter.model.TipoUsuario;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.model.Veterinario;
 import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
@@ -38,10 +35,6 @@ public class VeterinarioService {
 
         User usuarioLogado = getUsuarioAutenticado();
 
-        if (usuarioLogado.getTipoUsuario() != TipoUsuario.VETERINARIO) {
-            throw new RecursoNaoEncontradoException("O usuário informado não possui perfil de veterinário");
-        }
-
         Veterinario veterinario = new Veterinario();
         veterinario.setUser(usuarioLogado);
         veterinario.setCrmv(requestDTO.crmv());
@@ -62,19 +55,12 @@ public class VeterinarioService {
     @Transactional(readOnly = true)
     public VeterinarioResponseDTO buscarPorId(Long id) {
         Veterinario veterinario = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinario não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Veterinario não encontrado com ID: " + id));
         return VeterinarioResponseDTO.fromEntity(veterinario);
     }
 
     @Transactional(readOnly = true)
     public Page<VeterinarioResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
-
-        User usuarioLogado = getUsuarioAutenticado();
-
-        if (!userId.equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException("Você não pode acessar os dados de outro usuário");
-        }
-
         return veterinarioRepository.findByUserId(userId, pageable)
                 .map(VeterinarioResponseDTO::fromEntity);
     }
@@ -85,14 +71,10 @@ public class VeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Veterinário não encontrado com ID: " + id
-                ));
+                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado com ID: " + id));
 
         if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode atualizar o perfil de outro veterinário"
-            );
+            throw new RuntimeException("Você não pode atualizar o perfil de outro veterinário");
         }
 
         veterinarioExistente.setCrmv(requestDTO.crmv());
@@ -110,18 +92,14 @@ public class VeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Veterinário não encontrado com ID: " + id
-                ));
+                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado com ID: " + id));
 
         if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Você não pode excluir o perfil de outro veterinário"
-            );
+            throw new RuntimeException("Você não pode excluir o perfil de outro veterinário");
         }
 
         if (petVeterinarioRepository.existsByVeterinario_IdAndAtivo(id, true)) {
-            throw new DiarioEntradaComDependenciasException("Não é possível excluir o veterinário pois existem pets vinculados a ele");
+            throw new RuntimeException("Não é possível excluir o veterinário pois existem pets vinculados a ele");
         }
 
         veterinarioRepository.deleteById(id);

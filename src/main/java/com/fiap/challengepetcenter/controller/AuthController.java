@@ -3,6 +3,7 @@ package com.fiap.challengepetcenter.controller;
 import com.fiap.challengepetcenter.dto.request.LoginRequestDTO;
 import com.fiap.challengepetcenter.dto.response.LoginResponseDTO;
 import com.fiap.challengepetcenter.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth", description = "Autenticação de usuaŕios")
 public class AuthController {
 
     private final AuthService authService;

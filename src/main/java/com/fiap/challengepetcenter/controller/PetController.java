@@ -44,11 +44,8 @@ public class PetController {
                     description = "Dados inválidos"
             )
     })
-    public ResponseEntity<PetResponseDTO> criar(
-            @Valid @RequestBody PetRequestDTO requestDTO) {
-
+    public ResponseEntity<PetResponseDTO> criar(@Valid @RequestBody PetRequestDTO requestDTO) {
         PetResponseDTO novoPet = petService.salvar(requestDTO);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(novoPet);

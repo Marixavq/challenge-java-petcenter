@@ -46,9 +46,7 @@ public class AlertaService {
 
         Veterinario veterinario = veterinarioRepository
                 .findByUserId(usuarioLogado.getId())
-                .orElseThrow(() ->
-                        new RuntimeException("Veterinário não encontrado")
-                );
+                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado"));
 
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() ->
@@ -75,34 +73,21 @@ public class AlertaService {
 
     @Transactional(readOnly = true)
     public Page<AlertaResponseDTO> listarTodos(Pageable pageable) {
-
         return alertaRepository.findAll(pageable)
                 .map(AlertaResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)
     public AlertaResponseDTO buscarPorId(Long id) {
-
         Alerta alerta = alertaRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Alerta não encontrado com ID: " + id
-                        )
-                );
-
+                .orElseThrow(() -> new RuntimeException("Alerta não encontrado com ID: " + id));
         return AlertaResponseDTO.fromEntity(alerta);
     }
 
     @Transactional(readOnly = true)
-    public Page<AlertaResponseDTO> listarPorPet(
-            Long petId,
-            Pageable pageable
-    ) {
-
+    public Page<AlertaResponseDTO> listarPorPet(Long petId, Pageable pageable) {
         if (!petRepository.existsById(petId)) {
-            throw new RuntimeException(
-                    "Pet não encontrado com ID: " + petId
-            );
+            throw new RuntimeException("Pet não encontrado com ID: " + petId);
         }
 
         return alertaRepository.findByPetId(petId, pageable)
@@ -116,9 +101,7 @@ public class AlertaService {
 
         Alerta alerta = alertaRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Alerta não encontrado com ID: " + id
-                        )
+                        new RuntimeException("Alerta não encontrado com ID: " + id)
                 );
 
         boolean ehTutorDoPet =

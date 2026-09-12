@@ -1,7 +1,6 @@
 package com.fiap.challengepetcenter.repository;
 
 import com.fiap.challengepetcenter.model.PetVeterinario;
-import com.fiap.challengepetcenter.model.StatusSolicitacao;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,12 +14,12 @@ public interface PetVeterinarioRepository extends JpaRepository<PetVeterinario, 
             Long veterinarioId
     );
 
-    Page<PetVeterinario> findByVeterinario_Id(
+    Page<PetVeterinario> findByVeterinarioId(
             Long veterinarioId,
             Pageable pageable
     );
 
-    Page<PetVeterinario> findByPet_Id(
+    Page<PetVeterinario> findByPetId(
             Long petId,
             Pageable pageable
     );

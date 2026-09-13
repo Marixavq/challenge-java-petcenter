@@ -1,5 +1,6 @@
 package com.fiap.challengepetcenter.dto.request;
 
+import com.fiap.challengepetcenter.model.TipoAlerta;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,14 +23,13 @@ public record AlertaRequestDTO(
         )
         Long petId,
 
-        @NotBlank(message = "O tipo é obrigatório")
-        @Size(max = 20, message = "O tipo deve ter no máximo 20 caracteres")
+        @NotNull(message = "Tipo de usuário é obrigatório")
         @Schema(
                 description = "Tipo do alerta",
                 example = "REMEDIO",
                 required = true
         )
-        String tipo,
+        TipoAlerta tipo,
 
         @NotBlank(message = "O título é obrigatório")
         @Size(max = 150, message = "O título deve ter no máximo 150 caracteres")

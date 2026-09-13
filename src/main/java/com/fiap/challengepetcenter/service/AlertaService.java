@@ -50,9 +50,7 @@ public class AlertaService {
 
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Pet não encontrado com ID: " + requestDTO.petId()
-                        )
+                        new RuntimeException("Pet não encontrado com ID: " + requestDTO.petId())
                 );
 
         Alerta alerta = new Alerta();

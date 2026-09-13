@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.dto.response;
 
 import com.fiap.challengepetcenter.model.Alerta;
+import com.fiap.challengepetcenter.model.TipoAlerta;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,7 @@ public record AlertaResponseDTO(
         String petNome,
         Long veterinarioId,
         String veterinarioNome,
-        String tipo,
+        TipoAlerta tipo,
         String titulo,
         String descricao,
         LocalDateTime dataInicio,

@@ -54,12 +54,18 @@ public class UserController {
             summary = "Listar usuários",
             description = "Retorna uma lista completa de todos os usuários cadastrados."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de usuários retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de usuários retornada com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
-    )
+    })
     public ResponseEntity<Page<UserResponseDTO>> listarTodos(
             @PageableDefault(
                     page = 0,
@@ -86,6 +92,10 @@ public class UserController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Usuário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<UserResponseDTO> buscarPorId(@PathVariable Long id) {
@@ -106,6 +116,10 @@ public class UserController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Usuário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<UserResponseDTO> buscarPorEmail(@PathVariable String email) {
@@ -130,6 +144,10 @@ public class UserController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<UserResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody UserRequestDTO requestDTO) {
@@ -149,6 +167,10 @@ public class UserController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Usuário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<Void> deletar(@PathVariable Long id) {

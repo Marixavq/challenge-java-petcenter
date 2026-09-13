@@ -43,6 +43,14 @@ public class SolicitacaoController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<SolicitacaoResponseDTO> criar(
@@ -63,16 +71,23 @@ public class SolicitacaoController {
             summary = "Listar solicitações",
             description = "Retorna uma lista de solicitações cadastradas."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de solicitações retornada com sucesso",
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(
-                            implementation = SolicitacaoResponseDTO.class
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de solicitações retornada com sucesso",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(
+                                    implementation = SolicitacaoResponseDTO.class)
                     )
+            ),
+
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
-    )
+    })
+
     public ResponseEntity<Page<SolicitacaoResponseDTO>> listarTodos(
             @PageableDefault(
                     page = 0,
@@ -102,6 +117,10 @@ public class SolicitacaoController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Solicitação não encontrada"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<SolicitacaoResponseDTO> buscarPorId(
@@ -127,6 +146,14 @@ public class SolicitacaoController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Veterinário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Page<SolicitacaoResponseDTO>> buscarPorVeterinarioId(
@@ -161,6 +188,10 @@ public class SolicitacaoController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Pet não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<Page<SolicitacaoResponseDTO>> buscarPorPetId(
@@ -195,6 +226,14 @@ public class SolicitacaoController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Usuário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Page<SolicitacaoResponseDTO>> buscarPorTutorId(
@@ -233,6 +272,14 @@ public class SolicitacaoController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Solicitação já foi respondida"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<SolicitacaoResponseDTO> aceitar(
@@ -263,14 +310,19 @@ public class SolicitacaoController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Solicitação já foi respondida"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
-    public ResponseEntity<SolicitacaoResponseDTO> recusar(
-            @PathVariable Long id) {
-
+    public ResponseEntity<SolicitacaoResponseDTO> recusar(@PathVariable Long id) {
         SolicitacaoResponseDTO solicitacao =
                 solicitacaoService.recusar(id);
-
         return ResponseEntity.ok(solicitacao);
     }
 }

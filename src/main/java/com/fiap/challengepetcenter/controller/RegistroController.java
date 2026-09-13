@@ -42,6 +42,14 @@ public class RegistroController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<RegistroResponseDTO> criar(@Valid @RequestBody RegistroRequestDTO requestDTO) {
@@ -55,12 +63,22 @@ public class RegistroController {
             summary = "Listar registros",
             description = "Retorna uma lista completa de todos os registros cadastrados."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de registros retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = RegistroResponseDTO.class)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de registros retornada com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = RegistroResponseDTO.class)
+                    )),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
-    )
+
+    })
 
     public ResponseEntity<Page<RegistroResponseDTO>> listarTodos(
             @PageableDefault(
@@ -88,6 +106,10 @@ public class RegistroController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Registro não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<RegistroResponseDTO> buscarPorId(@PathVariable Long id) {
@@ -112,6 +134,14 @@ public class RegistroController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<RegistroResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody RegistroRequestDTO requestDTO) {
@@ -133,6 +163,14 @@ public class RegistroController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Registro não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Void> deletar(@PathVariable Long id) {

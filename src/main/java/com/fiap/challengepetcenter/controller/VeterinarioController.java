@@ -42,7 +42,16 @@ public class VeterinarioController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
+
     })
     public ResponseEntity<VeterinarioResponseDTO> criar(@Valid @RequestBody VeterinarioRequestDTO requestDTO) {
         VeterinarioResponseDTO novoVeterinario = veterinarioService.salvar(requestDTO);
@@ -55,12 +64,18 @@ public class VeterinarioController {
             summary = "Listar veterinarios",
             description = "Retorna uma lista completa de todos os veterinários cadastrados."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de veterinarios retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = VeterinarioResponseDTO.class)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de veterinarios retornada com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = VeterinarioResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
-    )
+    })
     public ResponseEntity<Page<VeterinarioResponseDTO>> listarTodos(
             @PageableDefault(
                     page = 0,
@@ -88,6 +103,10 @@ public class VeterinarioController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Veterinário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
 
@@ -113,6 +132,14 @@ public class VeterinarioController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Usuário ou veterinário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Page<VeterinarioResponseDTO>> buscarPorUserId(
@@ -148,6 +175,14 @@ public class VeterinarioController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<VeterinarioResponseDTO> atualizar(
@@ -175,13 +210,18 @@ public class VeterinarioController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Veterinário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
-    public ResponseEntity<Void> deletar(
-            @PathVariable Long id) {
-
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         veterinarioService.deletar(id);
-
         return ResponseEntity.noContent().build();
     }
 }

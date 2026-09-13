@@ -42,7 +42,16 @@ public class DiarioEntradaController {
                     description = "Entrada criada com sucesso"),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados inválidos")
+                    description = "Dados inválidos"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
+            )
+
     })
     public ResponseEntity<DiarioEntradaResponseDTO> criar(@Valid @RequestBody DiarioEntradaRequestDTO requestDTO) {
         DiarioEntradaResponseDTO novoDiarioEntrada = diarioEntradaService.salvar(requestDTO);
@@ -57,12 +66,17 @@ public class DiarioEntradaController {
             summary = "Listar todas as entradas no diário",
             description = "Retorna uma lista  completa de todas as entradas cadastradas."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de entradas no diário retornada com sucesso!!!",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DiarioEntradaResponseDTO.class))
-    )
-
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de entradas no diário retornada com sucesso!!!",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = DiarioEntradaResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            )
+    })
     public ResponseEntity<Page<DiarioEntradaResponseDTO>> listarTodos(
             @PageableDefault(
                     page = 0,
@@ -87,7 +101,15 @@ public class DiarioEntradaController {
                     description = "Entrada encontrada com sucesso"),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Entrada não encontrada")
+                    description = "Entrada não encontrada"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
+            )
     })
     public ResponseEntity<DiarioEntradaResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(diarioEntradaService.buscarPorId(id));
@@ -100,10 +122,16 @@ public class DiarioEntradaController {
             summary = "Buscar entradas por data",
             description = "Retorna todas as entradas cadastradas em uma data específica."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Entradas encontradas com sucesso"
-    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Entradas encontradas com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            )
+    })
     public ResponseEntity<Page<DiarioEntradaResponseDTO>> buscarPorData(
             @PathVariable LocalDate data,
             @PageableDefault(
@@ -135,6 +163,14 @@ public class DiarioEntradaController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<DiarioEntradaResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody DiarioEntradaRequestDTO requestDTO) {
@@ -156,6 +192,14 @@ public class DiarioEntradaController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Entrada não encontrada"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Void> deletar(@PathVariable Long id) {

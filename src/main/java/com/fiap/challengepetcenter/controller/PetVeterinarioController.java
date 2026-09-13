@@ -26,19 +26,24 @@ public class PetVeterinarioController {
     @Autowired
     private PetVeterinarioService petVeterinarioService;
 
-
     @GetMapping
     @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Listar relacionamento entre pets e veterinários",
             description = "Retorna uma lista completa de todos os relacionamento entre pets e veterinários cadastrados."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de relacionamento entre pets e veterinários retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PetVeterinarioResponseDTO.class)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de relacionamento entre pets e veterinários retornada com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = PetVeterinarioResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
-    )
+    })
     public ResponseEntity<Page<PetVeterinarioResponseDTO>> listarTodos(
             @PageableDefault(
                     page = 0,
@@ -65,12 +70,15 @@ public class PetVeterinarioController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Relacionamento entre pet e veterinário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<PetVeterinarioResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(petVeterinarioService.buscarPorId(id));
     }
-
 
     @GetMapping("/veterinario/{veterinarioId}")
     @PreAuthorize("hasRole('VETERINARIO')")
@@ -86,6 +94,14 @@ public class PetVeterinarioController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Veterinário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Page<PetVeterinarioResponseDTO>> buscarPorVeterinario(
@@ -114,6 +130,14 @@ public class PetVeterinarioController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Pet não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Page<PetVeterinarioResponseDTO>> buscarPorPet(
@@ -142,6 +166,14 @@ public class PetVeterinarioController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Relacionamento entre pet e veterinário  não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<Void> deletar(@PathVariable Long id) {

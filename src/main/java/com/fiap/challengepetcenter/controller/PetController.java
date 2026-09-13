@@ -42,6 +42,14 @@ public class PetController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<PetResponseDTO> criar(@Valid @RequestBody PetRequestDTO requestDTO) {
@@ -51,23 +59,25 @@ public class PetController {
                 .body(novoPet);
     }
 
-
     @GetMapping
     @PreAuthorize("hasRole('TUTOR') or hasRole('VETERINARIO')")
     @Operation(
             summary = "Listar pets",
             description = "Retorna uma lista de pets cadastrados."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Lista de pets retornada com sucesso",
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(
-                            implementation = PetResponseDTO.class
-                    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de pets retornada com sucesso",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PetResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
-    )
+    })
     public ResponseEntity<Page<PetResponseDTO>> listarTodos(
             @PageableDefault(
                     page = 0,
@@ -97,11 +107,13 @@ public class PetController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Pet não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
-    public ResponseEntity<PetResponseDTO> buscarPorId(
-            @PathVariable Long id) {
-
+    public ResponseEntity<PetResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(
                 petService.buscarPorId(id)
         );
@@ -122,6 +134,10 @@ public class PetController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Usuário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<Page<PetResponseDTO>> buscarPorUserId(
@@ -149,6 +165,10 @@ public class PetController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Pets encontrados com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<Page<PetResponseDTO>> buscarPorNome(
@@ -184,6 +204,14 @@ public class PetController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Dados inválidos"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<PetResponseDTO> atualizar(
@@ -211,13 +239,18 @@ public class PetController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Pet não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
-    public ResponseEntity<Void> deletar(
-            @PathVariable Long id) {
-
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
         petService.deletar(id);
-
         return ResponseEntity.noContent().build();
     }
 }

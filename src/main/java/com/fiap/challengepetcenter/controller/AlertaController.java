@@ -42,6 +42,14 @@ public class AlertaController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Pet ou veterinário não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado, mas sem permissão para acessar este recurso"
             )
     })
     public ResponseEntity<AlertaResponseDTO> criar(@Valid @RequestBody AlertaRequestDTO requestDTO) {
@@ -60,6 +68,10 @@ public class AlertaController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Alertas listados com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<Page<AlertaResponseDTO>> listarTodos(Pageable pageable) {
@@ -83,6 +95,10 @@ public class AlertaController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Alerta não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<AlertaResponseDTO> buscarPorId(
@@ -107,6 +123,10 @@ public class AlertaController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Pet não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Usuário não autenticado ou token inválido"
             )
     })
     public ResponseEntity<Page<AlertaResponseDTO>> listarPorPet(
@@ -138,11 +158,8 @@ public class AlertaController {
                     description = "Usuário não possui permissão para desativar o alerta"
             )
     })
-    public ResponseEntity<AlertaResponseDTO> desativar(
-            @PathVariable Long id) {
-
+    public ResponseEntity<AlertaResponseDTO> desativar(@PathVariable Long id) {
         return ResponseEntity.ok(
-                alertaService.desativar(id)
-        );
+                alertaService.desativar(id));
     }
 }

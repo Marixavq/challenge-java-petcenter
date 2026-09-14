@@ -547,11 +547,6 @@ https://challenge-java-petcenter.onrender.com
 
 https://challenge-java-petcenter.onrender.com/swagger-ui/index.html
 
-### Vídeo
+### Vídeo no Youtube
 
-Testando no Swagger
-https://youtu.be/UTdFWzu7d0c
-
-Integração com front-end
-https://youtu.be/o1JkktK9_uY
-
+https://www.youtube.com/watch?v=mP1Zy05BvDo

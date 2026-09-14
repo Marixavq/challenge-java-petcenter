@@ -482,7 +482,6 @@ A aplicação possui validações para impedir operações inválidas, incluindo
 * Controle de acesso por perfil;
 * Validação de ownership;
 * Impedimento de acesso ou alteração indevida de recursos;
-* Impedimento de solicitações veterinárias duplicadas;
 * Controle dos estados das solicitações;
 * Controle dos vínculos entre pets e veterinários;
 * Impedimento de exclusão de recursos que possuem dependências;
@@ -549,4 +548,10 @@ https://challenge-java-petcenter.onrender.com
 https://challenge-java-petcenter.onrender.com/swagger-ui/index.html
 
 ### Vídeo
+
+Testando no Swagger
+https://youtu.be/UTdFWzu7d0c
+
+Integração com front-end
+https://youtu.be/o1JkktK9_uY
 

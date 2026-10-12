@@ -2,6 +2,9 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.PetRequestDTO;
 import com.fiap.challengepetcenter.dto.response.PetResponseDTO;
+import com.fiap.challengepetcenter.exception.AcessoNegadoException;
+import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
@@ -31,7 +34,6 @@ public class PetService {
 
     @Transactional
     public PetResponseDTO salvar(PetRequestDTO requestDTO) {
-
         User usuarioLogado = getUsuarioAutenticado();
 
         Pet pet = new Pet();
@@ -56,7 +58,7 @@ public class PetService {
     @Transactional(readOnly = true)
     public PetResponseDTO buscarPorId(Long id) {
         Pet pet = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
         return PetResponseDTO.fromEntity(pet);
     }
 
@@ -74,14 +76,13 @@ public class PetService {
 
     @Transactional
     public PetResponseDTO atualizar(Long id, PetRequestDTO requestDTO) {
-
         User usuarioLogado = getUsuarioAutenticado();
 
         Pet petExistente = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         if (!petExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode atualizar um pet de outro usuário");
+            throw new AcessoNegadoException("Você não pode atualizar um pet de outro usuário");
         }
 
         petExistente.setNome(requestDTO.nome());
@@ -97,18 +98,17 @@ public class PetService {
 
     @Transactional
     public void deletar(Long id) {
-
         User usuarioLogado = getUsuarioAutenticado();
 
         Pet petExistente = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + id));
 
         if (!petExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode excluir um pet de outro usuário");
+            throw new AcessoNegadoException("Você não pode excluir um pet de outro usuário");
         }
 
         if (diarioEntradaRepository.existsByPetId(id)) {
-            throw new RuntimeException("Não é possível excluir o pet pois existem entradas de diário vinculadas a ele");
+            throw new RegraNegocioException("Não é possível excluir o pet pois existem entradas de diário vinculadas a ele");
         }
 
         petRepository.deleteById(id);
@@ -121,7 +121,7 @@ public class PetService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 
 }

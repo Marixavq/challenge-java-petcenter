@@ -2,6 +2,8 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.AlertaRequestDTO;
 import com.fiap.challengepetcenter.dto.response.AlertaResponseDTO;
+import com.fiap.challengepetcenter.exception.AcessoNegadoException;
+import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.Alerta;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
@@ -46,12 +48,10 @@ public class AlertaService {
 
         Veterinario veterinario = veterinarioRepository
                 .findByUserId(usuarioLogado.getId())
-                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado"));
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() ->
-                        new RuntimeException("Pet não encontrado com ID: " + requestDTO.petId())
-                );
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         Alerta alerta = new Alerta();
         alerta.setPet(pet);
@@ -78,14 +78,14 @@ public class AlertaService {
     @Transactional(readOnly = true)
     public AlertaResponseDTO buscarPorId(Long id) {
         Alerta alerta = alertaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Alerta não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Alerta não encontrado com ID: " + id));
         return AlertaResponseDTO.fromEntity(alerta);
     }
 
     @Transactional(readOnly = true)
     public Page<AlertaResponseDTO> listarPorPet(Long petId, Pageable pageable) {
         if (!petRepository.existsById(petId)) {
-            throw new RuntimeException("Pet não encontrado com ID: " + petId);
+            throw new RecursoNaoEncontradoException("Pet não encontrado com ID: " + petId);
         }
 
         return alertaRepository.findByPetId(petId, pageable)
@@ -99,7 +99,7 @@ public class AlertaService {
 
         Alerta alerta = alertaRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Alerta não encontrado com ID: " + id)
+                        new RecursoNaoEncontradoException("Alerta não encontrado com ID: " + id)
                 );
 
         boolean ehTutorDoPet =
@@ -111,9 +111,7 @@ public class AlertaService {
                         .equals(usuarioLogado.getId());
 
         if (!ehTutorDoPet && !ehVeterinarioDoAlerta) {
-            throw new RuntimeException(
-                    "Você não tem permissão para desativar este alerta"
-            );
+            throw new AcessoNegadoException("Você não tem permissão para desativar este alerta");
         }
 
         alerta.setAtivo(false);
@@ -133,7 +131,7 @@ public class AlertaService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException("Usuário não encontrado")
+                        new RecursoNaoEncontradoException("Usuário não encontrado")
                 );
     }
 }

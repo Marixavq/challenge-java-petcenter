@@ -2,6 +2,9 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.UserRequestDTO;
 import com.fiap.challengepetcenter.dto.response.UserResponseDTO;
+import com.fiap.challengepetcenter.exception.AcessoNegadoException;
+import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
@@ -31,7 +34,7 @@ public class UserService {
     @Transactional
     public UserResponseDTO salvar(UserRequestDTO requestDTO) {
         if (userRepository.existsByEmail(requestDTO.email())) {
-            throw new RuntimeException("Email já cadastrado");
+            throw new RegraNegocioException("Email já cadastrado");
         }
 
         User user = new User();
@@ -61,21 +64,21 @@ public class UserService {
         validarProprioUsuario(id, usuarioLogado);
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
         return UserResponseDTO.fromEntity(user);
     }
 
     @Transactional(readOnly = true)
     public UserResponseDTO buscarPorEmail(String email) {
-        
+
         User usuarioLogado = getUsuarioAutenticado();
 
         if (!usuarioLogado.getEmail().equals(email)) {
-            throw new RuntimeException("Você não pode acessar os dados de outro usuário");
+            throw new AcessoNegadoException("Você não pode acessar os dados de outro usuário");
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com email: " + email));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com email: " + email));
         return UserResponseDTO.fromEntity(user);
     }
 
@@ -87,11 +90,11 @@ public class UserService {
         validarProprioUsuario(id, usuarioLogado);
 
         User userExistente = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
 
         if (!userExistente.getEmail().equals(requestDTO.email())
                 && userRepository.existsByEmail(requestDTO.email())) {
-            throw new RuntimeException("Email já cadastrado");
+            throw new RegraNegocioException("Email já cadastrado");
         }
 
         userExistente.setNome(requestDTO.nome());
@@ -112,11 +115,11 @@ public class UserService {
         validarProprioUsuario(id, usuarioLogado);
 
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Usuário não encontrado com ID: " + id);
+            throw new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id);
         }
 
         if (petRepository.existsByUserId(id)) {
-            throw new RuntimeException("Não é possível excluir o usuário pois existem pets vinculados a ele");
+            throw new RegraNegocioException("Não é possível excluir o usuário pois existem pets vinculados a ele");
         }
         userRepository.deleteById(id);
     }
@@ -127,12 +130,12 @@ public class UserService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 
     private void validarProprioUsuario(Long id, User usuarioLogado) {
         if (!id.equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode acessar os dados de outro usuário");
+            throw new AcessoNegadoException("Você não pode acessar os dados de outro usuário");
         }
     }
 

@@ -2,6 +2,9 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.DiarioEntradaRequestDTO;
 import com.fiap.challengepetcenter.dto.response.DiarioEntradaResponseDTO;
+import com.fiap.challengepetcenter.exception.AcessoNegadoException;
+import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
@@ -41,10 +44,10 @@ public class DiarioEntradaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + requestDTO.petId()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode criar uma entrada para o pet de outro usuário");
+            throw new AcessoNegadoException("Você não pode criar uma entrada para o pet de outro usuário");
         }
 
         DiarioEntrada diarioEntrada = new DiarioEntrada();
@@ -70,7 +73,7 @@ public class DiarioEntradaService {
     @Transactional(readOnly = true)
     public DiarioEntradaResponseDTO buscarPorId(Long id) {
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
         return DiarioEntradaResponseDTO.fromEntity(diarioEntrada);
     }
 
@@ -86,17 +89,17 @@ public class DiarioEntradaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         DiarioEntrada diarioEntradaExistente = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
 
         if (!diarioEntradaExistente.getPet().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode atualizar uma entrada de outro usuário");
+            throw new AcessoNegadoException("Você não pode atualizar uma entrada de outro usuário");
         }
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + requestDTO.petId()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode associar a entrada ao pet de outro usuário");
+            throw new AcessoNegadoException("Você não pode associar a entrada ao pet de outro usuário");
         }
 
         diarioEntradaExistente.setPet(pet);
@@ -116,14 +119,14 @@ public class DiarioEntradaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
 
         if (!diarioEntrada.getPet().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode excluir uma entrada de outro usuário");
+            throw new AcessoNegadoException("Você não pode excluir uma entrada de outro usuário");
         }
 
         if (registroRepository.existsByEntradaId(id)) {
-            throw new RuntimeException("Não é possível excluir o DiarioEntrada pois existem registros vinculados a ele"
+            throw new RegraNegocioException("Não é possível excluir o DiarioEntrada pois existem registros vinculados a ele"
             );
         }
 
@@ -136,7 +139,7 @@ public class DiarioEntradaService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 }
 

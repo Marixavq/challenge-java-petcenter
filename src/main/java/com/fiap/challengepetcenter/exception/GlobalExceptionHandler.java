@@ -53,10 +53,12 @@ public class GlobalExceptionHandler {
                 .body(mensagens);
     }
 
+    /*
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleErroInterno(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Ocorreu um erro interno. Tente novamente mais tarde.");
     }
+     */
 }

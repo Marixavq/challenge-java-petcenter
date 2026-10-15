@@ -218,6 +218,10 @@ public class VeterinarioController {
             @ApiResponse(
                     responseCode = "403",
                     description = "Usuário autenticado, mas sem permissão para acessar este recurso"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Operação não permitida devido a uma regra de negócio"
             )
     })
     public ResponseEntity<Void> deletar(@PathVariable Long id) {

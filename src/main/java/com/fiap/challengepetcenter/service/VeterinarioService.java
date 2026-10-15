@@ -25,7 +25,6 @@ public class VeterinarioService {
     private final UserRepository userRepository;
     private final PetVeterinarioRepository petVeterinarioRepository;
 
-
     @Autowired
     public VeterinarioService(VeterinarioRepository veterinarioRepository, UserRepository userRepository, PetVeterinarioRepository petVeterinarioRepository) {
         this.veterinarioRepository = veterinarioRepository;

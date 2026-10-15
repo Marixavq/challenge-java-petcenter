@@ -98,8 +98,7 @@ public class AlertaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Alerta alerta = alertaRepository.findById(id)
-                .orElseThrow(() ->
-                        new RecursoNaoEncontradoException("Alerta não encontrado com ID: " + id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Alerta não encontrado com ID: " + id)
                 );
 
         boolean ehTutorDoPet =

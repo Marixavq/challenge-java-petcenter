@@ -23,12 +23,8 @@ public class PetVeterinarioService {
     private final PetVeterinarioRepository petVeterinarioRepository;
     private final UserRepository userRepository;
 
-
     @Autowired
-    public PetVeterinarioService(
-            PetVeterinarioRepository petVeterinarioRepository,
-            UserRepository userRepository) {
-
+    public PetVeterinarioService(PetVeterinarioRepository petVeterinarioRepository, UserRepository userRepository) {
         this.petVeterinarioRepository = petVeterinarioRepository;
         this.userRepository = userRepository;
     }

@@ -64,6 +64,10 @@ public class UserController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Operação não permitida devido a uma regra de negócio"
             )
     })
     public ResponseEntity<Page<UserResponseDTO>> listarTodos(
@@ -148,6 +152,10 @@ public class UserController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Operação não permitida devido a uma regra de negócio"
             )
     })
     public ResponseEntity<UserResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody UserRequestDTO requestDTO) {
@@ -171,6 +179,10 @@ public class UserController {
             @ApiResponse(
                     responseCode = "401",
                     description = "Usuário não autenticado ou token inválido"
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Operação não permitida devido a uma regra de negócio"
             )
     })
     public ResponseEntity<Void> deletar(@PathVariable Long id) {

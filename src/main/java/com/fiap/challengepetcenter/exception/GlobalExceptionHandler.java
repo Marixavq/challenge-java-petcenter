@@ -58,7 +58,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleErroInterno(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Ocorreu um erro interno. Tente novamente mais tarde.");
+       <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>         .body("Ocorreu um erro interno. Tente novamente mais tarde.");
     }
      */
 }

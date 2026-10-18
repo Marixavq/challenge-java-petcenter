@@ -12,6 +12,8 @@ import com.fiap.challengepetcenter.repository.AlertaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import com.fiap.challengepetcenter.repository.VeterinarioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AlertaService {
+
+    private static final Logger log = LoggerFactory.getLogger(AlertaService.class);
 
     private final PetRepository petRepository;
     private final AlertaRepository alertaRepository;
@@ -53,6 +57,8 @@ public class AlertaService {
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
+        log.info("Criando alerta para o pet ID {} pelo veterinário ID {}", pet.getId(), veterinario.getId());
+
         Alerta alerta = new Alerta();
         alerta.setPet(pet);
         alerta.setVeterinario(veterinario);
@@ -65,6 +71,8 @@ public class AlertaService {
         alerta.setAtivo(true);
 
         Alerta alertaSalvo = alertaRepository.save(alerta);
+
+        log.info("Alerta ID {} criado com sucesso", alertaSalvo.getId());
 
         return AlertaResponseDTO.fromEntity(alertaSalvo);
     }
@@ -115,8 +123,12 @@ public class AlertaService {
 
         alerta.setAtivo(false);
 
-        return AlertaResponseDTO.fromEntity(
-                alertaRepository.save(alerta)
+        Alerta alertaSalvo = alertaRepository.save(alerta);
+
+        log.info("Alerta ID {} desativado pelo usuário ID {}", alertaSalvo.getId(), usuarioLogado.getId());
+
+        return AlertaResponseDTO.fromEntity(alertaRepository.save(alertaSalvo)
+
         );
     }
 

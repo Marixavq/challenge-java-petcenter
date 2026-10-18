@@ -2,9 +2,6 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.VeterinarioRequestDTO;
 import com.fiap.challengepetcenter.dto.response.VeterinarioResponseDTO;
-import com.fiap.challengepetcenter.exception.AcessoNegadoException;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
-import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.model.Veterinario;
 import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
@@ -18,12 +15,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class VeterinarioService {
+
+    private static final Logger log = LoggerFactory.getLogger(VeterinarioService.class);
 
     private final VeterinarioRepository veterinarioRepository;
     private final UserRepository userRepository;
     private final PetVeterinarioRepository petVeterinarioRepository;
+
 
     @Autowired
     public VeterinarioService(VeterinarioRepository veterinarioRepository, UserRepository userRepository, PetVeterinarioRepository petVeterinarioRepository) {
@@ -45,6 +48,8 @@ public class VeterinarioService {
 
         Veterinario veterinarioSalvo = veterinarioRepository.save(veterinario);
 
+        log.info("Veterinário ID {} criado com sucesso", veterinarioSalvo.getId());
+
         return VeterinarioResponseDTO.fromEntity(veterinarioSalvo);
     }
 
@@ -57,7 +62,7 @@ public class VeterinarioService {
     @Transactional(readOnly = true)
     public VeterinarioResponseDTO buscarPorId(Long id) {
         Veterinario veterinario = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinario não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Veterinario não encontrado com ID: " + id));
         return VeterinarioResponseDTO.fromEntity(veterinario);
     }
 
@@ -73,10 +78,10 @@ public class VeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado com ID: " + id));
 
         if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode atualizar o perfil de outro veterinário");
+            throw new RuntimeException("Você não pode atualizar o perfil de outro veterinário");
         }
 
         veterinarioExistente.setCrmv(requestDTO.crmv());
@@ -84,6 +89,8 @@ public class VeterinarioService {
         veterinarioExistente.setDescricao(requestDTO.descricao());
 
         Veterinario veterinarioAtualizado = veterinarioRepository.save(veterinarioExistente);
+
+        log.info("Veterinário ID {} atualizado com sucesso", veterinarioAtualizado.getId());
 
         return VeterinarioResponseDTO.fromEntity(veterinarioAtualizado);
     }
@@ -94,17 +101,19 @@ public class VeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado com ID: " + id));
 
         if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode excluir o perfil de outro veterinário");
+            throw new RuntimeException("Você não pode excluir o perfil de outro veterinário");
         }
 
         if (petVeterinarioRepository.existsByVeterinario_IdAndAtivo(id, true)) {
-            throw new RegraNegocioException("Não é possível excluir o veterinário pois existem pets vinculados a ele");
+            throw new RuntimeException("Não é possível excluir o veterinário pois existem pets vinculados a ele");
         }
 
         veterinarioRepository.deleteById(id);
+        
+        log.info("Veterinário ID {} excluído com sucesso", id);
     }
 
     // Usuário autenticado pelo JWT
@@ -113,7 +122,7 @@ public class VeterinarioService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
 }

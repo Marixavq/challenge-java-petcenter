@@ -7,6 +7,8 @@ import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.*;
 import com.fiap.challengepetcenter.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,25 +17,43 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
+import java.util.concurrent.TimeUnit;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
 public class SolicitacaoService {
 
+    private static final Logger log = LoggerFactory.getLogger(SolicitacaoService.class);
+
     private final SolicitacaoRepository solicitacaoRepository;
     private final UserRepository userRepository;
     private final VeterinarioRepository veterinarioRepository;
     private final PetRepository petRepository;
     private final PetVeterinarioRepository petVeterinarioRepository;
+    private final Counter solicitacoesCriadas;
+    private final Timer tempoCriacaoSolicitacao;
 
     @Autowired
-    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository, PetRepository petRepository, PetVeterinarioRepository petVeterinarioRepository) {
+    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository, PetRepository petRepository, PetVeterinarioRepository petVeterinarioRepository, MeterRegistry registry) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.userRepository = userRepository;
         this.veterinarioRepository = veterinarioRepository;
         this.petRepository = petRepository;
         this.petVeterinarioRepository = petVeterinarioRepository;
+
+        this.solicitacoesCriadas = Counter.builder("petcenter.solicitacoes.criadas")
+                .description("Total de solicitações criadas com sucesso")
+                .register(registry);
+
+        this.tempoCriacaoSolicitacao = Timer.builder("petcenter.solicitacoes.criacao.tempo")
+                .description("Tempo de execução da criação de solicitações")
+                .register(registry);
     }
 
     @Transactional
@@ -50,6 +70,11 @@ public class SolicitacaoService {
             throw new AcessoNegadoException("Você não pode criar uma solicitação para o pet de outro usuário");
         }
 
+        log.info("Criando solicitação para o pet ID {} com veterinário ID {}",
+                pet.getId(), veterinario.getId());
+
+        long inicio = System.nanoTime();
+
         Solicitacao solicitacao = new Solicitacao();
         solicitacao.setPet(pet);
         solicitacao.setTutor(usuarioLogado);
@@ -59,6 +84,13 @@ public class SolicitacaoService {
         solicitacao.setCriadoEm(LocalDateTime.now());
 
         Solicitacao solicitacaoSalva = solicitacaoRepository.save(solicitacao);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoSolicitacao.record(duracao, TimeUnit.NANOSECONDS);
+
+        solicitacoesCriadas.increment();
+
+        log.info("Solicitação ID {} criada com status {}", solicitacaoSalva.getId(), solicitacaoSalva.getStatus());
 
         return SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);
     }
@@ -123,6 +155,8 @@ public class SolicitacaoService {
 
         Solicitacao solicitacaoSalva = solicitacaoRepository.save(solicitacao);
 
+        log.info("Solicitação de ID {} aceita", solicitacao.getId());
+
         return SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);
     }
 
@@ -146,6 +180,8 @@ public class SolicitacaoService {
 
         Solicitacao solicitacaoSalva = solicitacaoRepository.save(solicitacao);
 
+        log.info("Solicitação de ID {} recusada", solicitacao.getId());
+
         return SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);
     }
 
@@ -165,6 +201,8 @@ public class SolicitacaoService {
         }
 
         solicitacaoRepository.delete(solicitacao);
+
+        log.info("Solicitação ID {} excluída com sucesso", id);
     }
 
     // Usuário autenticado pelo JWT

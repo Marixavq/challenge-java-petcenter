@@ -2,9 +2,6 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.DiarioEntradaRequestDTO;
 import com.fiap.challengepetcenter.dto.response.DiarioEntradaResponseDTO;
-import com.fiap.challengepetcenter.exception.AcessoNegadoException;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
-import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
 import com.fiap.challengepetcenter.model.User;
@@ -12,6 +9,8 @@ import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +19,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDate;
 
 @Service
 public class DiarioEntradaService {
+
+    private static final Logger log = LoggerFactory.getLogger(DiarioEntradaService.class);
 
     private final DiarioEntradaRepository diarioEntradaRepository;
     private final PetRepository petRepository;
@@ -44,10 +48,10 @@ public class DiarioEntradaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode criar uma entrada para o pet de outro usuário");
+            throw new RuntimeException("Você não pode criar uma entrada para o pet de outro usuário");
         }
 
         DiarioEntrada diarioEntrada = new DiarioEntrada();
@@ -59,21 +63,21 @@ public class DiarioEntradaService {
 
         DiarioEntrada diarioEntradaSalvo = diarioEntradaRepository.save(diarioEntrada);
 
+        log.info("Entrada do diário ID {} criada com sucesso", diarioEntradaSalvo.getId());
+
         return DiarioEntradaResponseDTO.fromEntity(diarioEntradaSalvo);
     }
-
 
     @Transactional(readOnly = true)
     public Page<DiarioEntradaResponseDTO> listarTodos(Pageable pageable) {
         Page<DiarioEntrada> entradas = diarioEntradaRepository.findAll(pageable);
         return entradas.map(DiarioEntradaResponseDTO::fromEntity);
-
     }
 
     @Transactional(readOnly = true)
     public DiarioEntradaResponseDTO buscarPorId(Long id) {
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + id));
         return DiarioEntradaResponseDTO.fromEntity(diarioEntrada);
     }
 
@@ -89,17 +93,17 @@ public class DiarioEntradaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         DiarioEntrada diarioEntradaExistente = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + id));
 
         if (!diarioEntradaExistente.getPet().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode atualizar uma entrada de outro usuário");
+            throw new RuntimeException("Você não pode atualizar uma entrada de outro usuário");
         }
 
         Pet pet = petRepository.findById(requestDTO.petId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
+                .orElseThrow(() -> new RuntimeException("Pet não encontrado com ID: " + requestDTO.petId()));
 
         if (!pet.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode associar a entrada ao pet de outro usuário");
+            throw new RuntimeException("Você não pode associar a entrada ao pet de outro usuário");
         }
 
         diarioEntradaExistente.setPet(pet);
@@ -110,6 +114,8 @@ public class DiarioEntradaService {
 
         DiarioEntrada diarioEntradaAtualizado = diarioEntradaRepository.save(diarioEntradaExistente);
 
+        log.info("Entrada do diário ID {} atualizada com sucesso", diarioEntradaAtualizado.getId());
+
         return DiarioEntradaResponseDTO.fromEntity(diarioEntradaAtualizado);
 
     }
@@ -119,18 +125,20 @@ public class DiarioEntradaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + id));
 
         if (!diarioEntrada.getPet().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode excluir uma entrada de outro usuário");
+            throw new RuntimeException("Você não pode excluir uma entrada de outro usuário");
         }
 
         if (registroRepository.existsByEntradaId(id)) {
-            throw new RegraNegocioException("Não é possível excluir o DiarioEntrada pois existem registros vinculados a ele"
+            throw new RuntimeException("Não é possível excluir o DiarioEntrada pois existem registros vinculados a ele"
             );
         }
 
         diarioEntradaRepository.deleteById(id);
+
+        log.info("Entrada do diário ID {} excluída com sucesso", id);
     }
 
     // Usuário autenticado pelo JWT
@@ -139,7 +147,7 @@ public class DiarioEntradaService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 }
 

@@ -44,7 +44,11 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/h2-console/**",
                                 "/",
-                                "/error"
+                                "/error",
+                                "/actuator/health",
+                                "/actuator/info",
+                                "/actuator/metrics/**",
+                                "/actuator/prometheus"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()

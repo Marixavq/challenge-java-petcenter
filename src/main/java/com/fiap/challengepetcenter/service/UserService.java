@@ -2,9 +2,6 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.UserRequestDTO;
 import com.fiap.challengepetcenter.dto.response.UserResponseDTO;
-import com.fiap.challengepetcenter.exception.AcessoNegadoException;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
-import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
@@ -17,8 +14,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
     private final PetRepository petRepository;
@@ -34,7 +36,7 @@ public class UserService {
     @Transactional
     public UserResponseDTO salvar(UserRequestDTO requestDTO) {
         if (userRepository.existsByEmail(requestDTO.email())) {
-            throw new RegraNegocioException("Email já cadastrado");
+            throw new RuntimeException("Email já cadastrado");
         }
 
         User user = new User();
@@ -46,6 +48,8 @@ public class UserService {
         user.setAtivo(true);
 
         User userSalvo = userRepository.save(user);
+
+        log.info("Usuário ID {} criado com sucesso", userSalvo.getId());
 
         return UserResponseDTO.fromEntity(userSalvo);
     }
@@ -64,7 +68,7 @@ public class UserService {
         validarProprioUsuario(id, usuarioLogado);
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
         return UserResponseDTO.fromEntity(user);
     }
 
@@ -74,11 +78,11 @@ public class UserService {
         User usuarioLogado = getUsuarioAutenticado();
 
         if (!usuarioLogado.getEmail().equals(email)) {
-            throw new AcessoNegadoException("Você não pode acessar os dados de outro usuário");
+            throw new RuntimeException("Você não pode acessar os dados de outro usuário");
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com email: " + email));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com email: " + email));
         return UserResponseDTO.fromEntity(user);
     }
 
@@ -90,11 +94,11 @@ public class UserService {
         validarProprioUsuario(id, usuarioLogado);
 
         User userExistente = userRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
 
         if (!userExistente.getEmail().equals(requestDTO.email())
                 && userRepository.existsByEmail(requestDTO.email())) {
-            throw new RegraNegocioException("Email já cadastrado");
+            throw new RuntimeException("Email já cadastrado");
         }
 
         userExistente.setNome(requestDTO.nome());
@@ -103,6 +107,8 @@ public class UserService {
         userExistente.setTelefone(requestDTO.telefone());
 
         User userAtualizado = userRepository.save(userExistente);
+
+        log.info("Usuário ID {} atualizado com sucesso", userAtualizado.getId());
 
         return UserResponseDTO.fromEntity(userAtualizado);
     }
@@ -115,13 +121,16 @@ public class UserService {
         validarProprioUsuario(id, usuarioLogado);
 
         if (!userRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id);
+            throw new RuntimeException("Usuário não encontrado com ID: " + id);
         }
 
         if (petRepository.existsByUserId(id)) {
-            throw new RegraNegocioException("Não é possível excluir o usuário pois existem pets vinculados a ele");
+            throw new RuntimeException("Não é possível excluir o usuário pois existem pets vinculados a ele");
         }
+
         userRepository.deleteById(id);
+
+        log.info("Usuário ID {} excluído com sucesso", id);
     }
 
     // Usuário autenticado pelo JWT
@@ -130,12 +139,12 @@ public class UserService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
     private void validarProprioUsuario(Long id, User usuarioLogado) {
         if (!id.equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode acessar os dados de outro usuário");
+            throw new RuntimeException("Você não pode acessar os dados de outro usuário");
         }
     }
 

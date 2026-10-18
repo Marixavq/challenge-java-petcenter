@@ -1,8 +1,6 @@
 package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.response.PetVeterinarioResponseDTO;
-import com.fiap.challengepetcenter.exception.AcessoNegadoException;
-import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.PetVeterinario;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.PetRepository;
@@ -17,14 +15,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class PetVeterinarioService {
+
+    private static final Logger log = LoggerFactory.getLogger(PetVeterinarioService.class);
 
     private final PetVeterinarioRepository petVeterinarioRepository;
     private final UserRepository userRepository;
 
+
     @Autowired
-    public PetVeterinarioService(PetVeterinarioRepository petVeterinarioRepository, UserRepository userRepository) {
+    public PetVeterinarioService(
+            PetVeterinarioRepository petVeterinarioRepository,
+            UserRepository userRepository) {
+
         this.petVeterinarioRepository = petVeterinarioRepository;
         this.userRepository = userRepository;
     }
@@ -38,7 +46,7 @@ public class PetVeterinarioService {
     @Transactional(readOnly = true)
     public PetVeterinarioResponseDTO buscarPorId(Long id) {
         PetVeterinario petVeterinario = petVeterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
         return PetVeterinarioResponseDTO.fromEntity(petVeterinario);
     }
 
@@ -60,14 +68,16 @@ public class PetVeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         PetVeterinario petVeterinario = petVeterinarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
 
         if (!petVeterinario.getVeterinario().getUser().getId()
                 .equals(usuarioLogado.getId())) {
-            throw new AcessoNegadoException("Você não pode excluir o vínculo de outro veterinário");
+            throw new RuntimeException("Você não pode excluir o vínculo de outro veterinário");
         }
 
         petVeterinarioRepository.deleteById(id);
+
+        log.info("Relacionamento entre pet e veterinário com ID {} excluído com sucesso", id);
     }
 
     // Usuário autenticado pelo JWT
@@ -76,7 +86,7 @@ public class PetVeterinarioService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
 }

@@ -9,6 +9,12 @@ import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Service
 public class RegistroService {
 
@@ -30,16 +33,33 @@ public class RegistroService {
     private final RegistroRepository registroRepository;
     private final DiarioEntradaRepository diarioEntradaRepository;
     private final UserRepository userRepository;
+    private final Counter registrosCriados;
+    private final Timer tempoCriacaoRegistro;
+    private final Timer tempoListagemRegistros;
 
     @Autowired
-    public RegistroService(RegistroRepository registroRepository, DiarioEntradaRepository diarioEntradaRepository, UserRepository userRepository) {
+    public RegistroService(RegistroRepository registroRepository, DiarioEntradaRepository diarioEntradaRepository, UserRepository userRepository, MeterRegistry registry) {
         this.registroRepository = registroRepository;
         this.diarioEntradaRepository = diarioEntradaRepository;
         this.userRepository = userRepository;
+
+        this.registrosCriados = Counter.builder("petcenter.registros.criados")
+                .description("Total de registros criados com sucesso")
+                .register(registry);
+
+        this.tempoCriacaoRegistro = Timer.builder("petcenter.registros.criacao.tempo")
+                .description("Tempo de execução da criação de registros")
+                .register(registry);
+
+        this.tempoListagemRegistros = Timer.builder("petcenter.registros.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de registros")
+                .register(registry);
     }
 
     @Transactional
     public RegistroResponseDTO salvar(RegistroRequestDTO requestDTO) {
+        long inicio = System.nanoTime();
+
         User usuarioLogado = getUsuarioAutenticado();
 
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(requestDTO.entradaId())
@@ -59,6 +79,11 @@ public class RegistroService {
 
         Registro registroSalvo = registroRepository.save(registro);
 
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoRegistro.record(duracao, TimeUnit.NANOSECONDS);
+
+        registrosCriados.increment();
+
         log.info("Registro ID {} criado com sucesso", registroSalvo.getId());
 
         return RegistroResponseDTO.fromEntity(registroSalvo);
@@ -66,9 +91,15 @@ public class RegistroService {
 
     @Transactional(readOnly = true)
     public Page<RegistroResponseDTO> listarTodos(Pageable pageable) {
-        Page<Registro> registros = registroRepository.findAll(pageable);
+        long inicio = System.nanoTime();
 
-        return registros.map(RegistroResponseDTO::fromEntity);
+        Page<RegistroResponseDTO> registros = registroRepository.findAll(pageable)
+                .map(RegistroResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemRegistros.record(duracao, TimeUnit.NANOSECONDS);
+
+        return registros;
     }
 
     @Transactional(readOnly = true)

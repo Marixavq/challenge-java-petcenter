@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.DiarioEntradaRequestDTO;
+import com.fiap.challengepetcenter.dto.response.AlertaResponseDTO;
 import com.fiap.challengepetcenter.dto.response.DiarioEntradaResponseDTO;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Pet;
@@ -9,6 +10,10 @@ import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.RegistroRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class DiarioEntradaService {
@@ -33,17 +39,33 @@ public class DiarioEntradaService {
     private final PetRepository petRepository;
     private final RegistroRepository registroRepository;
     private final UserRepository userRepository;
+    private final Counter diarioEntradasCriados;
+    private final Timer tempoCriacaoDiarioEntradas;
+    private final Timer tempoListagemDiarioEntradas;
 
     @Autowired
-    public DiarioEntradaService(DiarioEntradaRepository diarioEntradaRepository, PetRepository petRepository, RegistroRepository registroRepository, UserRepository userRepository) {
+    public DiarioEntradaService(DiarioEntradaRepository diarioEntradaRepository, PetRepository petRepository, RegistroRepository registroRepository, UserRepository userRepository, MeterRegistry registry) {
         this.diarioEntradaRepository = diarioEntradaRepository;
         this.petRepository = petRepository;
         this.registroRepository = registroRepository;
         this.userRepository = userRepository;
+
+        this.diarioEntradasCriados = Counter.builder("petcenter.diarioEntradas.criados")
+                .description("Total de entradas no diário criados com sucesso")
+                .register(registry);
+
+        this.tempoCriacaoDiarioEntradas = Timer.builder("petcenter.diarioEntradas.criacao.tempo")
+                .description("Tempo de execução da criação de entradas no diário")
+                .register(registry);
+
+        this.tempoListagemDiarioEntradas = Timer.builder("petcenter.diarioEntradas.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de entradas no diário")
+                .register(registry);
     }
 
     @Transactional
     public DiarioEntradaResponseDTO salvar(DiarioEntradaRequestDTO requestDTO) {
+        long inicio = System.nanoTime();
 
         User usuarioLogado = getUsuarioAutenticado();
 
@@ -63,6 +85,11 @@ public class DiarioEntradaService {
 
         DiarioEntrada diarioEntradaSalvo = diarioEntradaRepository.save(diarioEntrada);
 
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoDiarioEntradas.record(duracao, TimeUnit.NANOSECONDS);
+
+        diarioEntradasCriados.increment();
+
         log.info("Entrada do diário ID {} criada com sucesso", diarioEntradaSalvo.getId());
 
         return DiarioEntradaResponseDTO.fromEntity(diarioEntradaSalvo);
@@ -70,8 +97,15 @@ public class DiarioEntradaService {
 
     @Transactional(readOnly = true)
     public Page<DiarioEntradaResponseDTO> listarTodos(Pageable pageable) {
-        Page<DiarioEntrada> entradas = diarioEntradaRepository.findAll(pageable);
-        return entradas.map(DiarioEntradaResponseDTO::fromEntity);
+        long inicio = System.nanoTime();
+
+        Page<DiarioEntradaResponseDTO> entradas = diarioEntradaRepository.findAll(pageable)
+                .map(DiarioEntradaResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemDiarioEntradas.record(duracao, TimeUnit.NANOSECONDS);
+
+        return entradas;
     }
 
     @Transactional(readOnly = true)

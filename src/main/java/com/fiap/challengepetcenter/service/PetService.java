@@ -7,6 +7,11 @@ import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.DiarioEntradaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class PetService {
 
@@ -26,16 +33,32 @@ public class PetService {
     private final PetRepository petRepository;
     private final UserRepository userRepository;
     private final DiarioEntradaRepository diarioEntradaRepository;
+    private final Counter petsCriados;
+    private final Timer tempoCriacaoPet;
+    private final Timer tempoListagemPets;
 
     @Autowired
-    public PetService(PetRepository petRepository, UserRepository userRepository, DiarioEntradaRepository diarioEntradaRepository) {
+    public PetService(PetRepository petRepository, UserRepository userRepository, DiarioEntradaRepository diarioEntradaRepository, MeterRegistry registry) {
         this.petRepository = petRepository;
         this.userRepository = userRepository;
         this.diarioEntradaRepository = diarioEntradaRepository;
+
+        this.petsCriados = Counter.builder("petcenter.pets.criados")
+                .description("Total de pets criados com sucesso")
+                .register(registry);
+
+        this.tempoCriacaoPet = Timer.builder("petcenter.pets.criacao.tempo")
+                .description("Tempo de execução da criação de alertas")
+                .register(registry);
+
+        this.tempoListagemPets = Timer.builder("petcenter.pets.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de pets")
+                .register(registry);
     }
 
     @Transactional
     public PetResponseDTO salvar(PetRequestDTO requestDTO) {
+        long inicio = System.nanoTime();
 
         User usuarioLogado = getUsuarioAutenticado();
 
@@ -49,6 +72,11 @@ public class PetService {
 
         Pet petSalvo = petRepository.save(pet);
 
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoPet.record(duracao, TimeUnit.NANOSECONDS);
+
+        petsCriados.increment();
+
         log.info("Pet ID {} criado com sucesso", petSalvo.getId());
 
         return PetResponseDTO.fromEntity(petSalvo);
@@ -56,8 +84,15 @@ public class PetService {
 
     @Transactional(readOnly = true)
     public Page<PetResponseDTO> listarTodos(Pageable pageable) {
-        return petRepository.findAll(pageable)
+        long inicio = System.nanoTime();
+
+        Page<PetResponseDTO> pets = petRepository.findAll(pageable)
                 .map(PetResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemPets.record(duracao, TimeUnit.NANOSECONDS);
+
+        return pets;
     }
 
     @Transactional(readOnly = true)

@@ -12,6 +12,13 @@ import com.fiap.challengepetcenter.repository.AlertaRepository;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import com.fiap.challengepetcenter.repository.VeterinarioRepository;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,31 +38,46 @@ public class AlertaService {
     private final AlertaRepository alertaRepository;
     private final UserRepository userRepository;
     private final VeterinarioRepository veterinarioRepository;
+    private final Counter alertasCriados;
+    private final Timer tempoCriacaoAlerta;
+    private final Timer tempoListagemAlertas;
 
     @Autowired
-    public AlertaService(
-            PetRepository petRepository,
-            AlertaRepository alertaRepository,
-            UserRepository userRepository,
-            VeterinarioRepository veterinarioRepository
-    ) {
+    public AlertaService(PetRepository petRepository, AlertaRepository alertaRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository, MeterRegistry registry) {
         this.petRepository = petRepository;
         this.alertaRepository = alertaRepository;
         this.userRepository = userRepository;
         this.veterinarioRepository = veterinarioRepository;
+
+        this.alertasCriados = Counter.builder("petcenter.alertas.criados")
+                .description("Total de alertas criados com sucesso")
+                .register(registry);
+
+        this.tempoCriacaoAlerta = Timer.builder("petcenter.alertas.criacao.tempo")
+                .description("Tempo de execução da criação de alertas")
+                .register(registry);
+
+        this.tempoListagemAlertas = Timer.builder("petcenter.alertas.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de alertas")
+                .register(registry);
     }
 
     @Transactional
     public AlertaResponseDTO salvar(AlertaRequestDTO requestDTO) {
+        long inicio = System.nanoTime();
 
         User usuarioLogado = getUsuarioAutenticado();
 
-        Veterinario veterinario = veterinarioRepository
-                .findByUserId(usuarioLogado.getId())
+        Veterinario veterinario = veterinarioRepository.findByUserId(usuarioLogado.getId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado"));
 
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
+
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoAlerta.record(duracao, TimeUnit.NANOSECONDS);
+
+        alertasCriados.increment();
 
         log.info("Criando alerta para o pet ID {} pelo veterinário ID {}", pet.getId(), veterinario.getId());
 
@@ -79,8 +101,15 @@ public class AlertaService {
 
     @Transactional(readOnly = true)
     public Page<AlertaResponseDTO> listarTodos(Pageable pageable) {
-        return alertaRepository.findAll(pageable)
+        long inicio = System.nanoTime();
+
+        Page<AlertaResponseDTO> alertas = alertaRepository.findAll(pageable)
                 .map(AlertaResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemAlertas.record(duracao, TimeUnit.NANOSECONDS);
+
+        return alertas;
     }
 
     @Transactional(readOnly = true)

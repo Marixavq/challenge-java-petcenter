@@ -1,6 +1,7 @@
 package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.SolicitacaoRequestDTO;
+import com.fiap.challengepetcenter.dto.response.PetResponseDTO;
 import com.fiap.challengepetcenter.dto.response.SolicitacaoResponseDTO;
 import com.fiap.challengepetcenter.exception.AcessoNegadoException;
 import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
@@ -38,6 +39,7 @@ public class SolicitacaoService {
     private final PetVeterinarioRepository petVeterinarioRepository;
     private final Counter solicitacoesCriadas;
     private final Timer tempoCriacaoSolicitacao;
+    private final Timer tempoListagemSolicitacoes;
 
     @Autowired
     public SolicitacaoService(SolicitacaoRepository solicitacaoRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository, PetRepository petRepository, PetVeterinarioRepository petVeterinarioRepository, MeterRegistry registry) {
@@ -54,10 +56,16 @@ public class SolicitacaoService {
         this.tempoCriacaoSolicitacao = Timer.builder("petcenter.solicitacoes.criacao.tempo")
                 .description("Tempo de execução da criação de solicitações")
                 .register(registry);
+
+        this.tempoListagemSolicitacoes = Timer.builder("petcenter.solicitacoes.listagem.tempo")
+                .description("Tempo de execução da listagem de solicitações")
+                .register(registry);
     }
 
     @Transactional
     public SolicitacaoResponseDTO salvar(SolicitacaoRequestDTO requestDTO) {
+        long inicio = System.nanoTime();
+
         Veterinario veterinario = veterinarioRepository.findById(requestDTO.veterinarioId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + requestDTO.veterinarioId()));
 
@@ -72,8 +80,6 @@ public class SolicitacaoService {
 
         log.info("Criando solicitação para o pet ID {} com veterinário ID {}",
                 pet.getId(), veterinario.getId());
-
-        long inicio = System.nanoTime();
 
         Solicitacao solicitacao = new Solicitacao();
         solicitacao.setPet(pet);
@@ -97,8 +103,15 @@ public class SolicitacaoService {
 
     @Transactional(readOnly = true)
     public Page<SolicitacaoResponseDTO> listarTodos(Pageable pageable) {
-        Page<Solicitacao> solicitacoes = solicitacaoRepository.findAll(pageable);
-        return solicitacoes.map(SolicitacaoResponseDTO::fromEntity);
+        long inicio = System.nanoTime();
+
+        Page<SolicitacaoResponseDTO> solicitacoes = solicitacaoRepository.findAll(pageable)
+                .map(SolicitacaoResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemSolicitacoes.record(duracao, TimeUnit.NANOSECONDS);
+
+        return solicitacoes;
     }
 
     @Transactional(readOnly = true)

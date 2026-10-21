@@ -1,12 +1,18 @@
 package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.VeterinarioRequestDTO;
+import com.fiap.challengepetcenter.dto.response.PetResponseDTO;
 import com.fiap.challengepetcenter.dto.response.VeterinarioResponseDTO;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.model.Veterinario;
 import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import com.fiap.challengepetcenter.repository.VeterinarioRepository;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class VeterinarioService {
 
@@ -26,17 +34,32 @@ public class VeterinarioService {
     private final VeterinarioRepository veterinarioRepository;
     private final UserRepository userRepository;
     private final PetVeterinarioRepository petVeterinarioRepository;
-
+    private final Counter veterinariosCriados;
+    private final Timer tempoCriacaoVeterinario;
+    private final Timer tempoListagemVeterinarios;
 
     @Autowired
-    public VeterinarioService(VeterinarioRepository veterinarioRepository, UserRepository userRepository, PetVeterinarioRepository petVeterinarioRepository) {
+    public VeterinarioService(VeterinarioRepository veterinarioRepository, UserRepository userRepository, PetVeterinarioRepository petVeterinarioRepository, MeterRegistry registry) {
         this.veterinarioRepository = veterinarioRepository;
         this.userRepository = userRepository;
         this.petVeterinarioRepository = petVeterinarioRepository;
+
+        this.veterinariosCriados = Counter.builder("petcenter.veterinarios.criados")
+                .description("Total de veterinários criados com sucesso")
+                .register(registry);
+
+        this.tempoCriacaoVeterinario = Timer.builder("petcenter.veterinarios.criacao.tempo")
+                .description("Tempo de execução da criação de veterinários")
+                .register(registry);
+
+        this.tempoListagemVeterinarios = Timer.builder("petcenter.veterinarios.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de veterinários")
+                .register(registry);
     }
 
     @Transactional
     public VeterinarioResponseDTO salvar(VeterinarioRequestDTO requestDTO) {
+        long inicio = System.nanoTime();
 
         User usuarioLogado = getUsuarioAutenticado();
 
@@ -48,6 +71,11 @@ public class VeterinarioService {
 
         Veterinario veterinarioSalvo = veterinarioRepository.save(veterinario);
 
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoVeterinario.record(duracao, TimeUnit.NANOSECONDS);
+
+        veterinariosCriados.increment();
+
         log.info("Veterinário ID {} criado com sucesso", veterinarioSalvo.getId());
 
         return VeterinarioResponseDTO.fromEntity(veterinarioSalvo);
@@ -55,8 +83,15 @@ public class VeterinarioService {
 
     @Transactional(readOnly = true)
     public Page<VeterinarioResponseDTO> listarTodos(Pageable pageable) {
-        return veterinarioRepository.findAll(pageable)
+        long inicio = System.nanoTime();
+
+        Page<VeterinarioResponseDTO> veterinarios = veterinarioRepository.findAll(pageable)
                 .map(VeterinarioResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemVeterinarios.record(duracao, TimeUnit.NANOSECONDS);
+
+        return veterinarios;
     }
 
     @Transactional(readOnly = true)
@@ -112,7 +147,7 @@ public class VeterinarioService {
         }
 
         veterinarioRepository.deleteById(id);
-        
+
         log.info("Veterinário ID {} excluído com sucesso", id);
     }
 

@@ -1,5 +1,6 @@
 package com.fiap.challengepetcenter.service;
 
+import com.fiap.challengepetcenter.dto.response.PetResponseDTO;
 import com.fiap.challengepetcenter.dto.response.PetVeterinarioResponseDTO;
 import com.fiap.challengepetcenter.model.PetVeterinario;
 import com.fiap.challengepetcenter.model.User;
@@ -7,6 +8,8 @@ import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
 import com.fiap.challengepetcenter.repository.VeterinarioRepository;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class PetVeterinarioService {
 
@@ -26,21 +31,29 @@ public class PetVeterinarioService {
 
     private final PetVeterinarioRepository petVeterinarioRepository;
     private final UserRepository userRepository;
-
+    private final Timer tempoListagemPetVeterinario;
 
     @Autowired
-    public PetVeterinarioService(
-            PetVeterinarioRepository petVeterinarioRepository,
-            UserRepository userRepository) {
-
+    public PetVeterinarioService(PetVeterinarioRepository petVeterinarioRepository, UserRepository userRepository, MeterRegistry registry) {
         this.petVeterinarioRepository = petVeterinarioRepository;
         this.userRepository = userRepository;
+
+        this.tempoListagemPetVeterinario = Timer.builder("petcenter.petVeterinario.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de pets")
+                .register(registry);
     }
 
     @Transactional(readOnly = true)
     public Page<PetVeterinarioResponseDTO> listarTodos(Pageable pageable) {
-        return petVeterinarioRepository.findAll(pageable)
+        long inicio = System.nanoTime();
+
+        Page<PetVeterinarioResponseDTO> petsVeterinarios = petVeterinarioRepository.findAll(pageable)
                 .map(PetVeterinarioResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemPetVeterinario.record(duracao, TimeUnit.NANOSECONDS);
+
+        return petsVeterinarios;
     }
 
     @Transactional(readOnly = true)
@@ -88,5 +101,4 @@ public class PetVeterinarioService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
-
 }

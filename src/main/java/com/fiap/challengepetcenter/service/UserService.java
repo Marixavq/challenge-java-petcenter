@@ -5,6 +5,11 @@ import com.fiap.challengepetcenter.dto.response.UserResponseDTO;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +32,33 @@ public class UserService {
     private final UserRepository userRepository;
     private final PetRepository petRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Counter usuariosCriados;
+    private final Timer tempoCriacaoUsuario;
+    private final Timer tempoListagemUsuarios;
 
     @Autowired
-    public UserService(UserRepository userRepository, PetRepository petRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PetRepository petRepository, PasswordEncoder passwordEncoder, MeterRegistry registry) {
         this.userRepository = userRepository;
         this.petRepository = petRepository;
         this.passwordEncoder = passwordEncoder;
+
+        this.usuariosCriados = Counter.builder("petcenter.usuarios.criados")
+                .description("Total de usuários criados com sucesso")
+                .register(registry);
+
+        this.tempoCriacaoUsuario = Timer.builder("petcenter.usuarios.criacao.tempo")
+                .description("Tempo de execução da criação de usuários")
+                .register(registry);
+
+        this.tempoListagemUsuarios = Timer.builder("petcenter.pets.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de pets")
+                .register(registry);
     }
 
     @Transactional
     public UserResponseDTO salvar(UserRequestDTO requestDTO) {
+        long inicio = System.nanoTime();
+
         if (userRepository.existsByEmail(requestDTO.email())) {
             throw new RuntimeException("Email já cadastrado");
         }
@@ -49,6 +73,11 @@ public class UserService {
 
         User userSalvo = userRepository.save(user);
 
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoUsuario.record(duracao, TimeUnit.NANOSECONDS);
+
+        usuariosCriados.increment();
+
         log.info("Usuário ID {} criado com sucesso", userSalvo.getId());
 
         return UserResponseDTO.fromEntity(userSalvo);
@@ -56,8 +85,15 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserResponseDTO> listarTodos(Pageable pageable) {
-        Page<User> users = userRepository.findAll(pageable);
-        return users.map(UserResponseDTO::fromEntity);
+        long inicio = System.nanoTime();
+
+        Page<UserResponseDTO> usuarios = userRepository.findAll(pageable)
+                .map(UserResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemUsuarios.record(duracao, TimeUnit.NANOSECONDS);
+
+        return usuarios;
     }
 
     @Transactional(readOnly = true)

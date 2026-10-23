@@ -135,8 +135,7 @@ public class AlertaService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Alerta alerta = alertaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Alerta não encontrado com ID: " + id)
-                );
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Alerta não encontrado com ID: " + id));
 
         boolean ehTutorDoPet =
                 alerta.getPet().getUser().getId()
@@ -162,15 +161,10 @@ public class AlertaService {
 
     // Usuário autenticado pelo JWT
     private User getUsuarioAutenticado() {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RecursoNaoEncontradoException("Usuário não encontrado")
-                );
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 }

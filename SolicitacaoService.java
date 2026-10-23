@@ -40,6 +40,9 @@ public class SolicitacaoService {
     private final Counter solicitacoesCriadas;
     private final Timer tempoCriacaoSolicitacao;
     private final Timer tempoListagemSolicitacoes;
+    private final Counter solicitacoesAceitas;
+    private final Counter solicitacoesRecusadas;
+    private final Timer tempoAceitarSolicitacao;
 
     @Autowired
     public SolicitacaoService(SolicitacaoRepository solicitacaoRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository, PetRepository petRepository, PetVeterinarioRepository petVeterinarioRepository, MeterRegistry registry) {
@@ -59,6 +62,18 @@ public class SolicitacaoService {
 
         this.tempoListagemSolicitacoes = Timer.builder("petcenter.solicitacoes.listagem.tempo")
                 .description("Tempo de execução da listagem de solicitações")
+                .register(registry);
+
+        this.solicitacoesAceitas = Counter.builder("petcenter.solicitacoes.aceitas")
+                .description("Total de solicitações aceitas com sucesso")
+                .register(registry);
+
+        this.solicitacoesRecusadas = Counter.builder("petcenter.solicitacoes.recusadas")
+                .description("Total de solicitações recusadas com sucesso")
+                .register(registry);
+
+        this.tempoAceitarSolicitacao = Timer.builder("petcenter.solicitacoes.aceitacao.tempo")
+                .description("Tempo de execução da aceitação da solicitações")
                 .register(registry);
     }
 
@@ -141,6 +156,8 @@ public class SolicitacaoService {
 
     @Transactional
     public SolicitacaoResponseDTO aceitar(Long id) {
+        long inicio = System.nanoTime();
+
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
 
@@ -168,9 +185,16 @@ public class SolicitacaoService {
 
         Solicitacao solicitacaoSalva = solicitacaoRepository.save(solicitacao);
 
+        solicitacoesAceitas.increment();
+
         log.info("Solicitação de ID {} aceita", solicitacao.getId());
 
-        return SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);
+        SolicitacaoResponseDTO resultado = SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoAceitarSolicitacao.record(duracao, TimeUnit.NANOSECONDS);
+
+        return resultado;
     }
 
     @Transactional
@@ -193,6 +217,8 @@ public class SolicitacaoService {
 
         Solicitacao solicitacaoSalva = solicitacaoRepository.save(solicitacao);
 
+        solicitacoesRecusadas.increment();
+        
         log.info("Solicitação de ID {} recusada", solicitacao.getId());
 
         return SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);

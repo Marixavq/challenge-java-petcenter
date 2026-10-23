@@ -125,8 +125,7 @@ public class RegistroService {
         }
 
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(requestDTO.entradaId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + requestDTO.entradaId()
-                ));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + requestDTO.entradaId()));
 
         if (!diarioEntrada.getPet().getUser().getId()
                 .equals(usuarioLogado.getId())) {

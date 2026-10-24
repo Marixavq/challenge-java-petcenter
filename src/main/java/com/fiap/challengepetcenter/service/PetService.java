@@ -39,6 +39,7 @@ public class PetService {
     private final Counter petsCriados;
     private final Timer tempoCriacaoPet;
     private final Timer tempoListagemPets;
+    private final Timer tempoBuscaPetsPorNome;
 
     @Autowired
     public PetService(PetRepository petRepository, UserRepository userRepository, DiarioEntradaRepository diarioEntradaRepository, MeterRegistry registry) {
@@ -51,11 +52,15 @@ public class PetService {
                 .register(registry);
 
         this.tempoCriacaoPet = Timer.builder("petcenter.pets.criacao.tempo")
-                .description("Tempo de execução da criação de alertas")
+                .description("Tempo de execução da criação de pets")
                 .register(registry);
 
         this.tempoListagemPets = Timer.builder("petcenter.pets.listagem.tempo")
                 .description("Tempo de execução da listagem paginada de pets")
+                .register(registry);
+
+        this.tempoBuscaPetsPorNome = Timer.builder("petcenter.pets.busca.nome.tempo")
+                .description("Tempo de execução da busca paginada de pets por nome")
                 .register(registry);
     }
 
@@ -111,10 +116,18 @@ public class PetService {
                 .map(PetResponseDTO::fromEntity);
     }
 
+
     @Transactional(readOnly = true)
     public Page<PetResponseDTO> buscarPorNome(String nome, Pageable pageable) {
-        return petRepository.findByNomeContaining(nome, pageable)
+        long inicio = System.nanoTime();
+
+        Page<PetResponseDTO> resultado = petRepository.findByNomeContaining(nome, pageable)
                 .map(PetResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoBuscaPetsPorNome.record(duracao, TimeUnit.NANOSECONDS);
+
+        return resultado;
     }
 
     @Transactional

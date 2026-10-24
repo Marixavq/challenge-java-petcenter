@@ -41,6 +41,7 @@ public class AlertaService {
     private final Counter alertasCriados;
     private final Timer tempoCriacaoAlerta;
     private final Timer tempoListagemAlertas;
+    private final Timer tempoListagemAlertasPorPet;
 
     @Autowired
     public AlertaService(PetRepository petRepository, AlertaRepository alertaRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository, MeterRegistry registry) {
@@ -60,6 +61,10 @@ public class AlertaService {
         this.tempoListagemAlertas = Timer.builder("petcenter.alertas.listagem.tempo")
                 .description("Tempo de execução da listagem paginada de alertas")
                 .register(registry);
+
+        this.tempoListagemAlertasPorPet = Timer.builder("petcenter.alertas.listagem.pet.tempo")
+                .description("Tempo de execução da listagem paginada de alertas por pet")
+                .register(registry);
     }
 
     @Transactional
@@ -74,13 +79,6 @@ public class AlertaService {
         Pet pet = petRepository.findById(requestDTO.petId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pet não encontrado com ID: " + requestDTO.petId()));
 
-        long duracao = System.nanoTime() - inicio;
-        tempoCriacaoAlerta.record(duracao, TimeUnit.NANOSECONDS);
-
-        alertasCriados.increment();
-
-        log.info("Criando alerta para o pet ID {} pelo veterinário ID {}", pet.getId(), veterinario.getId());
-
         Alerta alerta = new Alerta();
         alerta.setPet(pet);
         alerta.setVeterinario(veterinario);
@@ -93,6 +91,11 @@ public class AlertaService {
         alerta.setAtivo(true);
 
         Alerta alertaSalvo = alertaRepository.save(alerta);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoCriacaoAlerta.record(duracao, TimeUnit.NANOSECONDS);
+
+        alertasCriados.increment();
 
         log.info("Alerta ID {} criado com sucesso", alertaSalvo.getId());
 
@@ -121,12 +124,19 @@ public class AlertaService {
 
     @Transactional(readOnly = true)
     public Page<AlertaResponseDTO> listarPorPet(Long petId, Pageable pageable) {
+        long inicio = System.nanoTime();
+
         if (!petRepository.existsById(petId)) {
             throw new RecursoNaoEncontradoException("Pet não encontrado com ID: " + petId);
         }
 
-        return alertaRepository.findByPetId(petId, pageable)
+        Page<AlertaResponseDTO> resultado = alertaRepository.findByPetId(petId, pageable)
                 .map(AlertaResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoListagemAlertasPorPet.record(duracao, TimeUnit.NANOSECONDS);
+
+        return resultado;
     }
 
     @Transactional

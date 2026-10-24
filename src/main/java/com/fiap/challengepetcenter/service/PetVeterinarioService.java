@@ -38,7 +38,7 @@ public class PetVeterinarioService {
         this.userRepository = userRepository;
 
         this.tempoListagemPetVeterinario = Timer.builder("petcenter.petVeterinario.listagem.tempo")
-                .description("Tempo de execução da listagem paginada de pets")
+                .description("Tempo de execução da listagem paginada de vínculos entre pets e veterinários")
                 .register(registry);
     }
 

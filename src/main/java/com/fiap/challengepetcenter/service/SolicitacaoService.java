@@ -42,6 +42,7 @@ public class SolicitacaoService {
     private final Counter solicitacoesAceitas;
     private final Counter solicitacoesRecusadas;
     private final Timer tempoAceitarSolicitacao;
+    private final Timer tempoRecusarSolicitacao;
 
     @Autowired
     public SolicitacaoService(SolicitacaoRepository solicitacaoRepository, UserRepository userRepository, VeterinarioRepository veterinarioRepository, PetRepository petRepository, PetVeterinarioRepository petVeterinarioRepository, MeterRegistry registry) {
@@ -73,6 +74,10 @@ public class SolicitacaoService {
 
         this.tempoAceitarSolicitacao = Timer.builder("petcenter.solicitacoes.aceitacao.tempo")
                 .description("Tempo de execução da aceitação da solicitações")
+                .register(registry);
+
+        this.tempoRecusarSolicitacao = Timer.builder("petcenter.solicitacoes.recusa.tempo")
+                .description("Tempo de execução da recusa da solicitações")
                 .register(registry);
     }
 
@@ -198,6 +203,8 @@ public class SolicitacaoService {
 
     @Transactional
     public SolicitacaoResponseDTO recusar(Long id) {
+        long inicio = System.nanoTime();
+
         Solicitacao solicitacao = solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Solicitação não encontrada com ID: " + id));
 
@@ -220,7 +227,12 @@ public class SolicitacaoService {
 
         log.info("Solicitação de ID {} recusada", solicitacao.getId());
 
-        return SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);
+        SolicitacaoResponseDTO resultado = SolicitacaoResponseDTO.fromEntity(solicitacaoSalva);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoRecusarSolicitacao.record(duracao, TimeUnit.NANOSECONDS);
+
+        return resultado;
     }
 
     @Transactional

@@ -39,6 +39,7 @@ public class VeterinarioService {
     private final Counter veterinariosCriados;
     private final Timer tempoCriacaoVeterinario;
     private final Timer tempoListagemVeterinarios;
+    private final Timer tempoBuscaVeterinarioPorUsuario;
 
     @Autowired
     public VeterinarioService(VeterinarioRepository veterinarioRepository, UserRepository userRepository, PetVeterinarioRepository petVeterinarioRepository, MeterRegistry registry) {
@@ -56,6 +57,10 @@ public class VeterinarioService {
 
         this.tempoListagemVeterinarios = Timer.builder("petcenter.veterinarios.listagem.tempo")
                 .description("Tempo de execução da listagem paginada de veterinários")
+                .register(registry);
+
+        this.tempoBuscaVeterinarioPorUsuario = Timer.builder("petcenter.veterinarios.busca.usuario.tempo")
+                .description("Tempo de execução da busca paginada de veterinários por usuário")
                 .register(registry);
     }
 
@@ -105,8 +110,15 @@ public class VeterinarioService {
 
     @Transactional(readOnly = true)
     public Page<VeterinarioResponseDTO> buscarPorUserId(Long userId, Pageable pageable) {
-        return veterinarioRepository.findByUserId(userId, pageable)
+        long inicio = System.nanoTime();
+
+        Page<VeterinarioResponseDTO> resultado = veterinarioRepository.findByUserId(userId, pageable)
                 .map(VeterinarioResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoBuscaVeterinarioPorUsuario.record(duracao, TimeUnit.NANOSECONDS);
+
+        return resultado;
     }
 
     @Transactional
@@ -161,5 +173,4 @@ public class VeterinarioService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
-
 }

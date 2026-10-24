@@ -53,8 +53,8 @@ public class UserService {
                 .description("Tempo de execução da criação de usuários")
                 .register(registry);
 
-        this.tempoListagemUsuarios = Timer.builder("petcenter.pets.listagem.tempo")
-                .description("Tempo de execução da listagem paginada de pets")
+        this.tempoListagemUsuarios = Timer.builder("petcenter.usuarios.listagem.tempo")
+                .description("Tempo de execução da listagem paginada de usuários")
                 .register(registry);
     }
 
@@ -186,6 +186,4 @@ public class UserService {
             throw new AcessoNegadoException("Você não pode acessar os dados de outro usuário");
         }
     }
-
-
 }

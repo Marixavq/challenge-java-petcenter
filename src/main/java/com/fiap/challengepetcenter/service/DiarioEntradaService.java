@@ -43,6 +43,7 @@ public class DiarioEntradaService {
     private final Counter diarioEntradasCriados;
     private final Timer tempoCriacaoDiarioEntradas;
     private final Timer tempoListagemDiarioEntradas;
+    private final Timer tempoBuscaDiarioEntradasPorData;
 
     @Autowired
     public DiarioEntradaService(DiarioEntradaRepository diarioEntradaRepository, PetRepository petRepository, RegistroRepository registroRepository, UserRepository userRepository, MeterRegistry registry) {
@@ -61,6 +62,10 @@ public class DiarioEntradaService {
 
         this.tempoListagemDiarioEntradas = Timer.builder("petcenter.diarioEntradas.listagem.tempo")
                 .description("Tempo de execução da listagem paginada de entradas no diário")
+                .register(registry);
+
+        this.tempoBuscaDiarioEntradasPorData = Timer.builder("petcenter.diarioEntradas.busca.data.tempo")
+                .description("Tempo de execução da busca paginada de entradas no diário por data")
                 .register(registry);
     }
 
@@ -118,8 +123,15 @@ public class DiarioEntradaService {
 
     @Transactional(readOnly = true)
     public Page<DiarioEntradaResponseDTO> buscarPorData(LocalDate data, Pageable pageable) {
+        long inicio = System.nanoTime();
+
         Page<DiarioEntrada> entradas = diarioEntradaRepository.findByData(data, pageable);
-        return entradas.map(DiarioEntradaResponseDTO::fromEntity);
+        Page<DiarioEntradaResponseDTO> resultado = entradas.map(DiarioEntradaResponseDTO::fromEntity);
+
+        long duracao = System.nanoTime() - inicio;
+        tempoBuscaDiarioEntradasPorData.record(duracao, TimeUnit.NANOSECONDS);
+
+        return resultado;
     }
 
     @Transactional

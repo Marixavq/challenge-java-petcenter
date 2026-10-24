@@ -158,9 +158,9 @@ public class RegistroService {
             throw new AcessoNegadoException("Você não pode excluir um registro de outro usuário");
         }
 
-        log.info("Registro ID {} excluído com sucesso", id);
-
         registroRepository.deleteById(id);
+
+        log.info("Registro ID {} excluído com sucesso", id);
     }
 
     // Usuário autenticado pelo JWT

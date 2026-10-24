@@ -2,6 +2,8 @@ package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.RegistroRequestDTO;
 import com.fiap.challengepetcenter.dto.response.RegistroResponseDTO;
+import com.fiap.challengepetcenter.exception.AcessoNegadoException;
+import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.DiarioEntrada;
 import com.fiap.challengepetcenter.model.Registro;
 import com.fiap.challengepetcenter.model.User;
@@ -63,10 +65,10 @@ public class RegistroService {
         User usuarioLogado = getUsuarioAutenticado();
 
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(requestDTO.entradaId())
-                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + requestDTO.entradaId()));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + requestDTO.entradaId()));
 
         if (!diarioEntrada.getPet().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode criar um registro no diário de outro usuário");
+            throw new AcessoNegadoException("Você não pode criar um registro no diário de outro usuário");
         }
 
         Registro registro = new Registro();
@@ -105,7 +107,7 @@ public class RegistroService {
     @Transactional(readOnly = true)
     public RegistroResponseDTO buscarPorId(Long id) {
         Registro registro = registroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Registro não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Registro não encontrado com ID: " + id));
         return RegistroResponseDTO.fromEntity(registro);
     }
 
@@ -115,20 +117,19 @@ public class RegistroService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Registro registroExistente = registroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Registro não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Registro não encontrado com ID: " + id));
 
         if (!registroExistente.getEntrada().getPet().getUser().getId()
                 .equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode atualizar um registro de outro usuário");
+            throw new AcessoNegadoException("Você não pode atualizar um registro de outro usuário");
         }
 
         DiarioEntrada diarioEntrada = diarioEntradaRepository.findById(requestDTO.entradaId())
-                .orElseThrow(() -> new RuntimeException("DiarioEntrada não encontrado com ID: " + requestDTO.entradaId()
-                ));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("DiarioEntrada não encontrado com ID: " + requestDTO.entradaId()));
 
         if (!diarioEntrada.getPet().getUser().getId()
                 .equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode associar o registro ao diário de outro usuário");
+            throw new AcessoNegadoException("Você não pode associar o registro ao diário de outro usuário");
         }
 
         registroExistente.setEntrada(diarioEntrada);
@@ -151,10 +152,10 @@ public class RegistroService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Registro registroExistente = registroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Registro não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Registro não encontrado com ID: " + id));
 
         if (!registroExistente.getEntrada().getPet().getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode excluir um registro de outro usuário");
+            throw new AcessoNegadoException("Você não pode excluir um registro de outro usuário");
         }
 
         log.info("Registro ID {} excluído com sucesso", id);
@@ -168,7 +169,7 @@ public class RegistroService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 
 }

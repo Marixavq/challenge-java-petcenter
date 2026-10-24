@@ -1,13 +1,12 @@
 package com.fiap.challengepetcenter.service;
 
-import com.fiap.challengepetcenter.dto.response.PetResponseDTO;
 import com.fiap.challengepetcenter.dto.response.PetVeterinarioResponseDTO;
+import com.fiap.challengepetcenter.exception.AcessoNegadoException;
+import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
 import com.fiap.challengepetcenter.model.PetVeterinario;
 import com.fiap.challengepetcenter.model.User;
-import com.fiap.challengepetcenter.repository.PetRepository;
 import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
 import com.fiap.challengepetcenter.repository.UserRepository;
-import com.fiap.challengepetcenter.repository.VeterinarioRepository;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,7 @@ public class PetVeterinarioService {
     @Transactional(readOnly = true)
     public PetVeterinarioResponseDTO buscarPorId(Long id) {
         PetVeterinario petVeterinario = petVeterinarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
         return PetVeterinarioResponseDTO.fromEntity(petVeterinario);
     }
 
@@ -81,11 +80,11 @@ public class PetVeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         PetVeterinario petVeterinario = petVeterinarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo entre pet e veterinário não encontrado com ID: " + id));
 
         if (!petVeterinario.getVeterinario().getUser().getId()
                 .equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode excluir o vínculo de outro veterinário");
+            throw new AcessoNegadoException("Você não pode excluir o vínculo de outro veterinário");
         }
 
         petVeterinarioRepository.deleteById(id);
@@ -99,6 +98,6 @@ public class PetVeterinarioService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 }

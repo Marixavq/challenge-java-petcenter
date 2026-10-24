@@ -1,8 +1,10 @@
 package com.fiap.challengepetcenter.service;
 
 import com.fiap.challengepetcenter.dto.request.VeterinarioRequestDTO;
-import com.fiap.challengepetcenter.dto.response.PetResponseDTO;
 import com.fiap.challengepetcenter.dto.response.VeterinarioResponseDTO;
+import com.fiap.challengepetcenter.exception.AcessoNegadoException;
+import com.fiap.challengepetcenter.exception.RecursoNaoEncontradoException;
+import com.fiap.challengepetcenter.exception.RegraNegocioException;
 import com.fiap.challengepetcenter.model.User;
 import com.fiap.challengepetcenter.model.Veterinario;
 import com.fiap.challengepetcenter.repository.PetVeterinarioRepository;
@@ -97,7 +99,7 @@ public class VeterinarioService {
     @Transactional(readOnly = true)
     public VeterinarioResponseDTO buscarPorId(Long id) {
         Veterinario veterinario = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Veterinario não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinario não encontrado com ID: " + id));
         return VeterinarioResponseDTO.fromEntity(veterinario);
     }
 
@@ -113,10 +115,10 @@ public class VeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id));
 
         if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode atualizar o perfil de outro veterinário");
+            throw new AcessoNegadoException("Você não pode atualizar o perfil de outro veterinário");
         }
 
         veterinarioExistente.setCrmv(requestDTO.crmv());
@@ -136,14 +138,14 @@ public class VeterinarioService {
         User usuarioLogado = getUsuarioAutenticado();
 
         Veterinario veterinarioExistente = veterinarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Veterinário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Veterinário não encontrado com ID: " + id));
 
         if (!veterinarioExistente.getUser().getId().equals(usuarioLogado.getId())) {
-            throw new RuntimeException("Você não pode excluir o perfil de outro veterinário");
+            throw new AcessoNegadoException("Você não pode excluir o perfil de outro veterinário");
         }
 
         if (petVeterinarioRepository.existsByVeterinario_IdAndAtivo(id, true)) {
-            throw new RuntimeException("Não é possível excluir o veterinário pois existem pets vinculados a ele");
+            throw new RegraNegocioException("Não é possível excluir o veterinário pois existem pets vinculados a ele");
         }
 
         veterinarioRepository.deleteById(id);
@@ -157,7 +159,7 @@ public class VeterinarioService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 
 }

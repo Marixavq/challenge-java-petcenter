@@ -82,6 +82,10 @@ public class DiarioEntradaService {
             throw new AcessoNegadoException("Você não pode criar uma entrada para o pet de outro usuário");
         }
 
+        if (diarioEntradaRepository.existsByPetIdAndData(pet.getId(), requestDTO.data())) {
+            throw new RegraNegocioException("Já existe uma entrada para este pet nesta data.");
+        }
+
         DiarioEntrada diarioEntrada = new DiarioEntrada();
         diarioEntrada.setPet(pet);
         diarioEntrada.setData(requestDTO.data());

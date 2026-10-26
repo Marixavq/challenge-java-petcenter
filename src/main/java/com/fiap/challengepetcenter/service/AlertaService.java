@@ -147,13 +147,11 @@ public class AlertaService {
         Alerta alerta = alertaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Alerta não encontrado com ID: " + id));
 
-        boolean ehTutorDoPet =
-                alerta.getPet().getUser().getId()
-                        .equals(usuarioLogado.getId());
+        boolean ehTutorDoPet = alerta.getPet().getUser().getId()
+                .equals(usuarioLogado.getId());
 
-        boolean ehVeterinarioDoAlerta =
-                alerta.getVeterinario().getUser().getId()
-                        .equals(usuarioLogado.getId());
+        boolean ehVeterinarioDoAlerta = alerta.getVeterinario().getUser().getId()
+                .equals(usuarioLogado.getId());
 
         if (!ehTutorDoPet && !ehVeterinarioDoAlerta) {
             throw new AcessoNegadoException("Você não tem permissão para desativar este alerta");

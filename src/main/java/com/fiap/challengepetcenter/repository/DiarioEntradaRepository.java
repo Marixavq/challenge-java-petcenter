@@ -12,4 +12,6 @@ public interface DiarioEntradaRepository extends JpaRepository<DiarioEntrada, Lo
     Page<DiarioEntrada> findByData(LocalDate data, Pageable pageable);
 
     boolean existsByPetId(Long id);
+
+    boolean existsByPetIdAndData(Long petId, LocalDate data);
 }

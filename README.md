@@ -28,22 +28,27 @@ O sistema vai além de um simples CRUD, permitindo:
 
 * Java 21
 * Spring Boot
-* Spring Web
+* Spring Web MVC
 * Spring Data JPA
 * Spring Security
 * JWT (JSON Web Token)
 * Bean Validation
 * Lombok
+* Spring Boot Actuator
+* Micrometer
+* Prometheus
 
 ### Banco de Dados
 
-* H2 Database — utilizado durante o desenvolvimento e testes;
-* Oracle Database — previsto como alternativa para futura melhoria no ambiente de produção;
-* Flyway — controle e versionamento das migrations.
+* Oracle Database — persistência dos dados da aplicação;
+* Flyway — controle e versionamento das migrations do banco de dados.
 
-### Documentação
+### Documentação e Monitoramento
 
-* Swagger / OpenAPI
+* Swagger / OpenAPI — documentação e exploração dos endpoints;
+* Spring Boot Actuator — disponibilização de endpoints de monitoramento;
+* Micrometer — instrumentação e coleta de métricas da aplicação;
+* Prometheus — exposição das métricas em formato compatível com o Prometheus.
 
 ### Ferramentas
 
@@ -71,6 +76,7 @@ src/
     │       ├── dto/
     │       │   ├── request/
     │       │   └── response/
+            ├── exception/
     │       ├── model/
     │       ├── repository/
     │       ├── security/
@@ -92,24 +98,8 @@ Service
     ↓
 Repository
     ↓
-Database
+Oracle Database
 ```
-
-### Controller
-
-Responsável pelo recebimento das requisições HTTP, validação dos dados de entrada e controle de acesso aos endpoints.
-
-### Service
-
-Responsável pelas regras de negócio, validações de ownership e execução dos principais fluxos da aplicação.
-
-### Repository
-
-Responsável pela persistência e consulta dos dados utilizando Spring Data JPA.
-
-### DTO
-
-Utilizados para controlar os dados de entrada e saída da API, evitando a exposição direta das entidades.
 
 ---
 
@@ -132,7 +122,9 @@ Utilizados para controlar os dados de entrada e saída da API, evitando a exposi
 * Desativação de alertas;
 * Validações de dados utilizando Bean Validation;
 * Paginação de consultas;
+* Tratamento de erros e respostas HTTP adequadas;
 * Versionamento do banco de dados utilizando Flyway;
+* Métricas de negócio e monitoramento da aplicação;
 * Documentação da API utilizando Swagger/OpenAPI.
 
 ---
@@ -237,14 +229,13 @@ JWT_SECRET
 
 ### Execução local
 
-A aplicação utiliza uma chave secreta para geração e validação dos tokens JWT.
+No IntelliJ IDEA, a variável pode ser configurada nas **Run Configurations** da aplicação.
+
 Exemplo:
 
 ```text
 JWT_SECRET=sua-chave-secreta-aqui
 ```
-
-No IntelliJ IDEA, a variável pode ser configurada nas **Run Configurations** da aplicação.
 
 Para ambientes de produção, recomenda-se configurar a chave por meio de uma variável de ambiente, evitando que
 informações sensíveis sejam armazenadas no código-fonte.
@@ -254,32 +245,156 @@ aplicação utiliza uma chave padrão definida para o ambiente de desenvolviment
 
 ---
 
-## 💾 Banco de Dados e Flyway
+## 💾 Banco de Dados Oracle e Flyway
 
-Durante o desenvolvimento, a aplicação utiliza o **H2 Database**.
+A aplicação utiliza o **Oracle Database** como banco de dados relacional para persistência das informações.
 
-O banco utilizado localmente é configurado como banco em memória, sendo adequado para desenvolvimento e testes.
+A conexão é configurada por meio de variáveis de ambiente, evitando o armazenamento de credenciais diretamente no
+código-fonte.
 
-As alterações da estrutura do banco são controladas pelo **Flyway**.
+As principais variáveis de conexão são:
 
-As migrations ficam em:
+```text
+ORACLE_USER
+ORACLE_PASSWORD
+```
+
+A URL de conexão utiliza o serviço Oracle disponibilizado pela FIAP:
+
+```text
+jdbc:oracle:thin:@//oracle.fiap.com.br:1521/ORCL
+```
+
+As credenciais devem ser configuradas no ambiente de execução local, como nas **Run Configurations** do IntelliJ IDEA, e
+nas variáveis de ambiente do serviço publicado no Render.
+
+### Versionamento do banco de dados
+
+As alterações estruturais do banco são controladas pelo **Flyway**, permitindo que as migrations sejam versionadas e
+aplicadas de forma organizada.
+
+Os arquivos ficam em:
 
 ```text
 src/main/resources/db/migration/
 ```
 
-Cada migration representa uma versão da estrutura do banco e é executada automaticamente pela aplicação.
+Cada migration representa uma versão da estrutura do banco e é executada conforme o controle de versionamento do Flyway.
 
-Exemplo:
+Exemplos de nomenclatura:
 
 ```text
 V1__create_users.sql
 V2__create_pets.sql
 V3__create_veterinarios.sql
-...
 ```
 
-O Flyway garante que as alterações estruturais sejam aplicadas de forma controlada e versionada.
+O projeto utiliza migrations para manter a evolução do esquema do banco de dados controlada e versionada, garantindo a
+aplicação organizada das alterações estruturais.
+
+---
+
+## 📊 Observabilidade e Monitoramento
+
+A aplicação possui instrumentação de métricas utilizando **Spring Boot Actuator**, **Micrometer** e **Prometheus**,
+permitindo acompanhar a disponibilidade da API e observar o comportamento de operações importantes.
+
+### Spring Boot Actuator
+
+O Actuator disponibiliza endpoints de gerenciamento e monitoramento da aplicação.
+
+Os principais endpoints utilizados são:
+
+| Endpoint               | Finalidade                                                |
+|------------------------|-----------------------------------------------------------|
+| `/actuator/health`     | Verificar o estado de saúde da aplicação.                 |
+| `/actuator/metrics`    | Consultar as métricas registradas.                        |
+| `/actuator/prometheus` | Expor as métricas em formato compatível com o Prometheus. |
+
+### Métricas de negócio
+
+Foram implementados **counters** e **timers** para acompanhar operações relevantes dos serviços.
+
+**Counters**
+
+Contabilizam a ocorrência de operações de negócio bem-sucedidas, como a criação de usuários, pets, registros e alertas.
+
+Também são contabilizadas operações específicas de solicitações veterinárias, como aceitação e recusa.
+
+Exemplos de métricas:
+
+```text
+petcenter.usuarios.criados
+petcenter.pets.criados
+petcenter.registros.criados
+petcenter.alertas.criados
+petcenter.solicitacoes.criadas
+petcenter.solicitacoes.aceitas
+petcenter.solicitacoes.recusadas
+```
+
+**Timers**
+
+Registram informações de duração e quantidade de execuções de operações selecionadas, permitindo observar o tempo gasto
+em operações de criação, listagem e consultas específicas.
+
+Exemplos:
+
+```text
+petcenter.usuarios.criacao.tempo
+petcenter.pets.criacao.tempo
+petcenter.solicitacoes.criacao.tempo
+petcenter.solicitacoes.aceitacao.tempo
+petcenter.solicitacoes.recusa.tempo
+```
+
+A instrumentação também contempla operações de listagem e consultas específicas de entidades, conforme os serviços
+implementados.
+
+### Objetivos da instrumentação
+
+* Acompanhar a quantidade de operações de negócio realizadas;
+* Observar a duração de operações selecionadas;
+* Identificar possíveis variações de desempenho;
+* Facilitar a inspeção do comportamento da aplicação;
+* Disponibilizar métricas para ferramentas compatíveis com Prometheus.
+
+As métricas são registradas durante a execução da aplicação e podem ser consultadas pelos endpoints de monitoramento
+disponibilizados.
+
+### Validação em produção
+
+Os endpoints de saúde, métricas e Prometheus foram verificados no ambiente publicado no Render, confirmando o
+funcionamento da configuração de observabilidade.
+
+---
+
+## ⚠️ Tratamento de Erros e Validações
+
+A API possui mecanismos de validação e tratamento de erros para fornecer respostas HTTP adequadas às situações
+encontradas durante o processamento das requisições.
+
+### Validação de dados
+
+O **Bean Validation** é utilizado para validar dados de entrada, contribuindo para impedir o processamento de
+informações inválidas.
+
+As regras de negócio também são verificadas na camada Service, incluindo validações de propriedade dos recursos e
+restrições específicas das operações.
+
+### Tratamento de exceções
+
+O tratamento de erros foi revisado para evitar que exceções específicas sejam mascaradas por um tratamento genérico,
+dificultando a identificação da causa real dos problemas.
+
+As respostas devem refletir a natureza do erro, distinguindo situações como:
+
+* Dados de entrada inválidos;
+* Recursos não encontrados;
+* Operações incompatíveis com o estado atual de um recurso;
+* Falhas de autenticação ou autorização;
+* Violações de restrições de integridade do banco de dados;
+* Erros inesperados durante o processamento.
 
 ---
 
@@ -290,8 +405,13 @@ O Flyway garante que as alterações estruturais sejam aplicadas de forma contro
 Antes de executar o projeto, tenha instalado:
 
 * Java 21;
-* Maven;
-* Git.
+* Git;
+* IntelliJ IDEA (opcional, para execução pela IDE).
+
+O projeto utiliza o Maven Wrapper, incluído no repositório, para executar os comandos Maven sem exigir uma instalação
+global do Maven.
+
+Também é necessário ter acesso ao **Oracle Database** utilizado pela aplicação e configurar as credenciais de conexão.
 
 ### 1. Clonar o repositório
 
@@ -305,72 +425,80 @@ git clone https://github.com/Marixavq/challenge-java-petcenter.git
 cd challenge-java-petcenter
 ```
 
-### 3. Abrir no IntelliJ IDEA
+### 3. Abrir o projeto no IntelliJ IDEA
 
-Abra o projeto como um projeto Maven.
+Abra o projeto como um projeto Maven e aguarde o carregamento e o download das dependências.
 
-Aguarde o download das dependências antes de executar a aplicação.
+### 4. Configurar as variáveis de ambiente
 
-### 4. Configurar a chave JWT
+A aplicação utiliza variáveis de ambiente para acessar o banco de dados Oracle e assinar os tokens JWT.
 
-Configure a variável de ambiente:
+Configure as seguintes variáveis:
 
 ```text
-JWT_SECRET=sua-chave-secreta-aqui
+ORACLE_USER=seu_usuario_oracle
+ORACLE_PASSWORD=sua_senha_oracle
+JWT_SECRET=sua_chave_secreta
 ```
+
+Substitua os valores de exemplo pelos valores correspondentes ao seu ambiente. Não compartilhe nem publique credenciais
+reais no repositório.
+
+No IntelliJ IDEA, as variáveis podem ser configuradas em **Run > Edit Configurations**, na configuração de execução da
+aplicação.
 
 ### 5. Executar a aplicação
 
 Execute a classe principal:
 
-```java
+```text
 ChallengepetcenterApplication
 ```
 
-Ou utilize o Maven:
+Ou utilize o Maven Wrapper no terminal.
 
-Linux/macOS:
+**Linux/macOS:**
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Windows:
+**Windows:**
 
-```bash
+```bat
 mvnw.cmd spring-boot:run
 ```
 
+Certifique-se de que as variáveis de ambiente estejam disponíveis no processo que executa a aplicação.
+
 ### 6. Acessar a aplicação
 
-Após iniciar o projeto:
+Após iniciar a aplicação, a API estará disponível localmente em:
 
 ```text
 http://localhost:8080
 ```
 
+A rota raiz responde com uma mensagem indicando que a API está funcionando.
+
 ---
 
 ## ☁️ Deploy
 
-A aplicação está publicada utilizando o **Render**.
+A aplicação está publicada na plataforma **Render**.
 
 ### URL da API
 
-```text
 https://challenge-java-petcenter.onrender.com
-```
 
 ### Swagger em produção
 
-```text
 https://challenge-java-petcenter.onrender.com/swagger-ui/index.html
-```
 
-A URL do Swagger permite visualizar e testar os endpoints da API diretamente pelo navegador.
+A documentação interativa permite visualizar e testar os endpoints da API diretamente pelo navegador.
 
-> Observação: o ambiente de deploy utiliza as variáveis de ambiente configuradas no Render, incluindo a chave
-`JWT_SECRET`.
+A aplicação utiliza variáveis de ambiente configuradas diretamente no serviço do Render para gerenciar as credenciais do
+banco Oracle e a chave JWT.
 
 ---
 
@@ -390,11 +518,11 @@ https://challenge-java-petcenter.onrender.com/swagger-ui/index.html
 
 O Swagger permite:
 
-* Visualizar os endpoints;
-* Consultar parâmetros;
-* Visualizar modelos de Request e Response;
+* Visualizar os endpoints disponíveis;
+* Consultar parâmetros e respostas;
+* Visualizar os modelos de Request e Response;
 * Testar as operações da API;
-* Enviar JWT para endpoints protegidos.
+* Informar o token JWT para acessar endpoints protegidos.
 
 ### Utilizando JWT no Swagger
 
@@ -416,7 +544,8 @@ Bearer SEU_TOKEN
 
 ### Fluxo de solicitação veterinária
 
-O Tutor pode solicitar o atendimento de um veterinário para um de seus pets.
+O Tutor pode solicitar atendimento veterinário para um de seus pets. A solicitação fica pendente até que o veterinário
+decida aceitá-la ou recusá-la.
 
 ```text
 Tutor
@@ -425,11 +554,11 @@ Seleciona um pet
   ↓
 Seleciona um veterinário
   ↓
-Cria solicitação
+Cria a solicitação
   ↓
 Solicitação PENDENTE
   ↓
-Veterinário visualiza a solicitação
+Veterinário analisa a solicitação
   ↓
        ┌───────────────┐
        ↓               ↓
@@ -440,6 +569,9 @@ entre pet e        RECUSADA
 veterinário
 ```
 
+Quando a solicitação é aceita, é criado o vínculo entre o pet e o veterinário. Quando é recusada, a solicitação passa
+para o estado correspondente.
+
 ### Fluxo de acompanhamento do pet
 
 ```text
@@ -449,10 +581,10 @@ Pet
   ↓
 Entrada no diário
   ↓
-Registro
+Registro de acompanhamento
 ```
 
-Esse fluxo permite manter um histórico estruturado da rotina do pet.
+Esse fluxo organiza as informações relacionadas à rotina do pet, permitindo manter um histórico de acompanhamento.
 
 ### Fluxo de alertas
 
@@ -463,29 +595,30 @@ Cria alerta para um pet
   ↓
 Alerta ativo
   ↓
-Tutor ou veterinário responsável
-  ↓
-Desativa alerta
+Desativação do alerta
   ↓
 Alerta inativo
 ```
+
+O alerta pode ser desativado conforme as permissões e regras de negócio implementadas na aplicação.
 
 ---
 
 ## 📋 Validações e Regras de Negócio
 
-A aplicação possui validações para impedir operações inválidas, incluindo:
+A aplicação possui validações destinadas a impedir operações inválidas e proteger a integridade dos dados, incluindo:
 
-* Campos obrigatórios;
+* Validação de campos obrigatórios;
 * Limites de tamanho dos campos;
-* E-mail único para usuários;
+* Validação de e-mail único para usuários;
 * Controle de acesso por perfil;
-* Validação de ownership;
-* Impedimento de acesso ou alteração indevida de recursos;
-* Controle dos estados das solicitações;
-* Controle dos vínculos entre pets e veterinários;
-* Impedimento de exclusão de recursos que possuem dependências;
-* Validação dos dados recebidos através de Bean Validation.
+* Validação de ownership, verificando a propriedade dos recursos quando aplicável;
+* Prevenção de acesso ou alteração indevida de recursos;
+* Controle dos estados das solicitações veterinárias;
+* Validação das operações relacionadas aos vínculos entre pets e veterinários;
+* Tratamento de conflitos de integridade durante operações de persistência;
+* Validação dos dados recebidos utilizando Bean Validation;
+* Tratamento de erros para retornar respostas HTTP compatíveis com as situações encontradas.
 
 ---
 
@@ -495,26 +628,39 @@ A API pode ser testada utilizando:
 
 * Swagger UI;
 * Insomnia;
-* Postman;
+* Postman.
 
-Os principais cenários testados incluem:
+Os principais cenários de teste incluem:
 
 * Cadastro de usuário;
 * Login e geração de JWT;
-* Acesso sem autenticação;
-* Acesso com perfil correto;
-* Acesso com perfil incorreto;
+* Acesso a endpoints protegidos sem autenticação;
+* Acesso com perfil autorizado;
+* Tentativas de acesso com perfil não autorizado;
 * Cadastro e gerenciamento de pets;
 * Criação de entradas no diário;
-* Criação de registros;
+* Criação de registros de acompanhamento;
 * Criação de solicitações veterinárias;
-* Aceitação de solicitações;
-* Recusa de solicitações;
+* Aceitação e recusa de solicitações;
 * Criação de vínculos entre pets e veterinários;
 * Criação e desativação de alertas;
 * Validação de ownership;
-* Paginação;
-* Validações dos dados enviados.
+* Paginação de consultas;
+* Validação dos dados enviados;
+* Verificação dos endpoints de saúde e observabilidade;
+* Consulta das métricas da aplicação e exposição no formato Prometheus.
+
+### Verificação da observabilidade
+
+No ambiente local, os endpoints podem ser acessados por:
+
+```text
+http://localhost:8080/actuator/health
+http://localhost:8080/actuator/metrics
+http://localhost:8080/actuator/prometheus
+```
+
+Em produção, substitua `http://localhost:8080` pela URL pública do serviço no Render.
 
 ---
 
@@ -533,20 +679,17 @@ do Challenge interdisciplinar da FIAP.
 
 ---
 
-## 📄 Links do Projeto
+## 🔗 Links do Projeto
 
-### GitHub
-
-https://github.com/Marixavq/challenge-java-petcenter
-
-### Deploy
-
-https://challenge-java-petcenter.onrender.com
-
-### Swagger
-
-https://challenge-java-petcenter.onrender.com/swagger-ui/index.html
+| Recurso                      | Link                                                                |
+|------------------------------|---------------------------------------------------------------------|
+| **Repositório GitHub**       | https://github.com/Marixavq/challenge-java-petcenter                |
+| **API em produção (Render)** | https://challenge-java-petcenter.onrender.com                       |
+| **Swagger / OpenAPI**        | https://challenge-java-petcenter.onrender.com/swagger-ui/index.html |
+| **Health Check**             | https://challenge-java-petcenter.onrender.com/actuator/health       |
+| **Métricas da aplicação**    | https://challenge-java-petcenter.onrender.com/actuator/metrics      |
+| **Métricas Prometheus**      | https://challenge-java-petcenter.onrender.com/actuator/prometheus   |
 
 ### Vídeo no Youtube
 
-https://www.youtube.com/watch?v=mP1Zy05BvDo
+
